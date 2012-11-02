@@ -3,7 +3,7 @@
 ;   $Revision: 130 $
 ;=====================================================================
 
-; ‚±‚±‚Н’P‘М——pЃA‚Ь‚Ѕ‚НAutoExec“а‚Й #Include ‚Е‘g‚Э‚±‚с‚ѕЏкЌ‡‚Й’К‚й
+; гЃ“гЃ“гЃЇеЌдЅ“е€©з”ЁгЂЃгЃѕгЃџгЃЇAutoExecе†…гЃ« #Include гЃ§зµ„гЃїгЃ“г‚“гЃ е ґеђ€гЃ«йЂљг‚‹
 TW_Init:
 	If (A_LineFile == A_ScriptFullPath)
 		Menu, Tray, Tip, TrackWheel
@@ -11,11 +11,11 @@ TW_Init:
 	return
 
 ;=====================================================================
-; ѓ†Ѓ[ѓU’и‹`ѓTѓuѓ‹Ѓ[ѓ`ѓ“ЉЦA
+; гѓ¦гѓјг‚¶е®љзѕ©г‚µгѓ–гѓ«гѓјгѓЃгѓій–ўйЂЈ
 ;=====================================================================
-; ѓ†Ѓ[ѓUѓAѓNѓVѓ‡ѓ“
-;   Ћw’иѓTѓuѓ‹Ѓ[ѓ`ѓ“‚Є‚ ‚к‚ОЋАЌs
-;   ѓtѓ‰ѓO‚Єѓ†Ѓ[ѓU‚Й‚ж‚иЌ~‚л‚і‚к‚Д‚ў‚й‚©‚З‚¤‚©‚р•Ф‚·
+; гѓ¦гѓјг‚¶г‚ўг‚Їг‚·гѓ§гѓі
+;   жЊ‡е®љг‚µгѓ–гѓ«гѓјгѓЃгѓігЃЊгЃ‚г‚ЊгЃ°е®џиЎЊ
+;   гѓ•гѓ©г‚°гЃЊгѓ¦гѓјг‚¶гЃ«г‚€г‚Љй™Ќг‚ЌгЃ•г‚ЊгЃ¦гЃ„г‚‹гЃ‹гЃ©гЃ†гЃ‹г‚’иї”гЃ™
 TW_UserAction() {
 	global
 	TW_UserFlg:=true
@@ -25,24 +25,24 @@ TW_UserAction() {
 }
 
 ;=====================================================================
-; ѓzѓbѓgѓLЃ[ЉЦA
+; гѓ›гѓѓгѓ€г‚­гѓјй–ўйЂЈ
 ;=====================================================================
 
-; Iniѓtѓ@ѓCѓ‹‚ЕђЭ’и‚µ‚ЅѓLЃ[‚рЃA"Hotkey"ѓRѓ}ѓ“ѓh‚Е‚±‚Мѓ‰ѓxѓ‹‚ЙЉ„‚и“–‚Д‚й
+; Iniгѓ•г‚Ўг‚¤гѓ«гЃ§иЁ­е®љгЃ—гЃџг‚­гѓјг‚’гЂЃ"Hotkey"г‚ігѓћгѓігѓ‰гЃ§гЃ“гЃ®гѓ©гѓ™гѓ«гЃ«е‰Іг‚ЉеЅ“гЃ¦г‚‹
 TW_HotkeyStart:
 	if ((TW_Key:=TW_Start()) && (A_TimeSinceThisHotkey < TW__Timeout) && !(TW__QuitSendOnMove && TW_Scrolled))
 		Send, {Blind}{%TW_Key%}
 	return
 
 ;=====================================================================
-; ЋАЌsђ§ЊдЊn
+; е®џиЎЊе€¶еѕЎзі»
 ;=====================================================================
 
-; ЉJЋnЉЦђ”
+; й–‹е§‹й–ўж•°
 ;  TW_State
-;     0: ‰Ѕ‚а‚µ‚И‚ў
-;     1: ѓ}ѓEѓX€Ъ“®—}ђ§ЉJЋn
-;     2: ѓ}ѓEѓX€Ъ“®‚рѓXѓNѓЌЃ[ѓ‹‚Й•ПЉ·
+;     0: дЅ•г‚‚гЃ—гЃЄгЃ„
+;     1: гѓћг‚¦г‚№з§»е‹•жЉ‘е€¶й–‹е§‹
+;     2: гѓћг‚¦г‚№з§»е‹•г‚’г‚№г‚Їгѓ­гѓјгѓ«гЃ«е¤‰жЏ›
 TW_Start(isToggle=false) {
 	global TW_State, TW_RuleX, TW_RuleY, TW_Scrolled, TW_hHook, TW_ScrollCountX, TW_ScrollCountY
 	Thread, NoTimers, True
@@ -82,7 +82,7 @@ TW_Stop() {
 }
 
 ;=====================================================================
-;  ѓ}ѓEѓXѓtѓbѓN
+;  гѓћг‚¦г‚№гѓ•гѓѓг‚Ї
 ;=====================================================================
 ; See:
 ;  http://msdn.microsoft.com/en-us/library/ms644970(VS.85).aspx
@@ -97,28 +97,28 @@ TW_MouseLL(nCode, wParam, lParam) {
 				dx += NumGet(lParam+0,0,"Int") - TW_X
 				dy += NumGet(lParam+4,0,"Int") - TW_Y
 				if (counter++>=TW__DiffCount) {
-					PostMessage,A_EventInfo, dx, dy,,ahk_id %TW__GuiHwnd% ; A_EventInfo=RegisterCallback‚М‘ж5€шђ”
+					PostMessage,A_EventInfo, dx, dy,,ahk_id %TW__GuiHwnd% ; A_EventInfo=RegisterCallbackгЃ®з¬¬5еј•ж•°
 					dx:=0, dy:=0, counter:=0
 				}
 			}
-			return 1 ; ”jЉь
+			return 1 ; з ґжЈ„
 		}
 	}
 	return DllCall("user32.dll\CallNextHookEx", "UInt",0, "Int",nCode, "UInt",wParam, "UInt",lParam)
 }
 
 ;=====================================================================
-; ѓЃѓbѓZЃ[ѓW‘Т‚їЋу‚ЇЉЦђ”
+; гѓЎгѓѓг‚»гѓјг‚ёеѕ…гЃЎеЏ—гЃ‘й–ўж•°
 ;=====================================================================
-; Ћ©•ЄЋ©ђg‚Й“Љ‚°‚з‚к‚ЅѓЃѓbѓZЃ[ѓW‚рЏ€—ќ‚·‚й‚Ж‚±‚л
-;   ‚±‚±‚ЕѓЌЃ[ѓJѓ‹•Пђ”‰»‚µ‚Д‚в‚й
-;   ‚±‚к‚ЄЏd‚­‚ДЏ€—ќЋdђШ‚к‚И‚ў‚Ж‚«‚МЊг‘±‚МѓЃѓbѓZЃ[ѓW‚НDrop‚µ‚Д‚а
-;   Ќ\‚н‚И‚ў‚Н‚ё‚И‚М‚ЕCritical‚Й‚Н‚µ‚И‚ў
+; и‡Єе€†и‡Єиє«гЃ«жЉ•гЃ’г‚‰г‚ЊгЃџгѓЎгѓѓг‚»гѓјг‚ёг‚’е‡¦зђ†гЃ™г‚‹гЃЁгЃ“г‚Ќ
+;   гЃ“гЃ“гЃ§гѓ­гѓјг‚«гѓ«е¤‰ж•°еЊ–гЃ—гЃ¦г‚„г‚‹
+;   гЃ“г‚ЊгЃЊй‡ЌгЃЏгЃ¦е‡¦зђ†д»•е€‡г‚ЊгЃЄгЃ„гЃЁгЃЌгЃ®еѕЊз¶љгЃ®гѓЎгѓѓг‚»гѓјг‚ёгЃЇDropгЃ—гЃ¦г‚‚
+;   ж§‹г‚ЏгЃЄгЃ„гЃЇгЃљгЃЄгЃ®гЃ§CriticalгЃ«гЃЇгЃ—гЃЄгЃ„
 TW_MsgListener(wParam, lParam, msg, hwnd) {
 	global
 	local dx,dy, ax, aY, lineX, lineY
 	SetBatchLines, -1
-	dx:=(wParam>0x7FFFFFFF) ? -(~wParam + 1) : wParam ; •„Ќ†‰»‚·‚й
+	dx:=(wParam>0x7FFFFFFF) ? -(~wParam + 1) : wParam ; з¬¦еЏ·еЊ–гЃ™г‚‹
 	dy:=(lParam>0x7FFFFFFF) ? -(~lParam + 1) : lParam
 	aX:=Abs(dx), aY:=Abs(dy)
 	if (TW__DenyBoth)
@@ -162,19 +162,19 @@ TW_ScrollDispattcher(lineX, lineY, ruleX, ruleY) {
 	TW_LastLine:=TW__Max(Abs(lineX), Abs(lineY))
 }
 
-; ‰ЎѓXѓNѓЌЃ[ѓ‹Ќsђ”‚рЊvЋZЃB•„Ќ†‚Н—LЊш
+; жЁЄг‚№г‚Їгѓ­гѓјгѓ«иЎЊж•°г‚’иЁ€з®—гЂ‚з¬¦еЏ·гЃЇжњ‰еЉ№
 TW_CalcLineX(dx) {
 	global TW_TX,TW_SX, TW_ReverseX, TW_Accel
 	return TW_CalcLine(dx, TW_TX,TW_SX, TW_ReverseX, 0)
 }
 
-; ЏcѓXѓNѓЌЃ[ѓ‹Ќsђ”‚рЊvЋZЃB•„Ќ†‚Н—LЊш
+; зё¦г‚№г‚Їгѓ­гѓјгѓ«иЎЊж•°г‚’иЁ€з®—гЂ‚з¬¦еЏ·гЃЇжњ‰еЉ№
 TW_CalcLineY(dy) {
 	global TW_TY,TW_SY, TW_ReverseY, TW_Accel
 	return TW_CalcLine(dy, TW_TY,TW_SY, TW_ReverseY, TW_Accel)
 }
 
-; Ќsђ”ЊvЋZ‚МЋА‘МЉЦђ”
+; иЎЊж•°иЁ€з®—гЃ®е®џдЅ“й–ўж•°
 TW_CalcLine(dd, t, s, r, accel) {
 	ab:=Abs(dd)
 	value := accel ? Ceil(((ab-t)/s)**1.5) : Ceil((ab-t)/s)
@@ -183,7 +183,7 @@ TW_CalcLine(dd, t, s, r, accel) {
 }
 
 ;=====================================================================
-; ѓXѓNѓЌЃ[ѓ‹ЋАЌsЉЦђ”ЊQ
+; г‚№г‚Їгѓ­гѓјгѓ«е®џиЎЊй–ўж•°зѕ¤
 ;=====================================================================
 
 ;==========================
@@ -197,7 +197,7 @@ TW__Wheel_Y(line, keys) {
 }
 TW__Wheel_Common(msg, line, keys) {
 	local notch
-	notch := (TW_Accel && !(keys & 8)) ? 60 : 120 ; 120‚М”{ђ”‚Й‚µ‚И‚ў‚Ж‚¤‚Ь‚­ѓYЃ[ѓЂ‚µ‚И‚ўЋ–‚Є‚ ‚й‚М‚Е
+	notch := (TW_Accel && !(keys & 8)) ? 60 : 120 ; 120гЃ®еЂЌж•°гЃ«гЃ—гЃЄгЃ„гЃЁгЃ†гЃѕгЃЏг‚єгѓјгѓ гЃ—гЃЄгЃ„дє‹гЃЊгЃ‚г‚‹гЃ®гЃ§
 	SendMessage, msg, (-notch*line)<<16|keys, TW_lParam,,ahk_id %TW_HwndCtrl%
 }
 
@@ -230,7 +230,7 @@ TW__Scroll_Common(msg, line, type, sbHwnd, target, option) {
 	global TW_ScrollCountY
 	if !TW_GetScrollInfoAll(sbHwnd ? sbHwnd : target, type, min, max, page, pos, trackPos)
 		return 1 ; change scroll mode on failure of retrieving scrollinfo
-	if (max>min && page<1) ; 1page—К‚р0‚Е•Ф‚·‚а‚М‚Є‚ ‚й‚а‚М‚М‘О‰ћ(eg. DF)
+	if (max>min && page<1) ; 1pageй‡Џг‚’0гЃ§иї”гЃ™г‚‚гЃ®гЃЊгЃ‚г‚‹г‚‚гЃ®гЃ®еЇѕеїњ(eg. DF)
 		page++
 	max := (option & 0x02) ? 0xFFFF : max - page + 1
 	,newPos := pos + line*Ceil(page/100)
@@ -286,7 +286,7 @@ TW__Vkey_Y(line) {
 	global
 	TW__Vkey_Common(line < 0 ? 0x26 : 0x28, line, TW_SbYHwnd ? TW_SbYHwnd : TW_HwndCtrl) ; VK_UP / VK_DOWN
 }
-; VKey‚МЏкЌ‡ѓtѓHЃ[ѓJѓX‚р€Ъ“®‚µ‚И‚ў‚Ж–і—ќ‚И‚±‚Ж‚Є‚ ‚й‚М‚ЕЋАЋ{
+; VKeyгЃ®е ґеђ€гѓ•г‚©гѓјг‚«г‚№г‚’з§»е‹•гЃ—гЃЄгЃ„гЃЁз„Ўзђ†гЃЄгЃ“гЃЁгЃЊгЃ‚г‚‹гЃ®гЃ§е®џж–Ѕ
 TW__Vkey_Pre() {
 	global
 	ControlFocus,,ahk_id %TW_HwndCtrl%
@@ -307,9 +307,9 @@ TW__LView_Y(line) {
 }
 TW__LView(lineX, lineY) {
 	global
-	SendMessage, 0x1014, lineX*TW_LvLineX, lineY*TW_LvLineY,, ahk_id %TW_HwndCtrl% ; LVM_SCROLL(ѓhѓbѓg’P€К)
+	SendMessage, 0x1014, lineX*TW_LvLineX, lineY*TW_LvLineY,, ahk_id %TW_HwndCtrl% ; LVM_SCROLL(гѓ‰гѓѓгѓ€еЌдЅЌ)
 }
-; ‘OЏ€—ќ
+; е‰Ќе‡¦зђ†
 TW__LView_Pre() {
 	local x1, y1, x2, y2, view
 	TW_LvLineX := TW_LvLineY := 4
@@ -343,12 +343,12 @@ TW__DragL(lineX, lineY) {
 ;==========================
 ; Task
 ;==========================
-; X‚ЖY‚Н‹¤’К
+; XгЃЁYгЃЇе…±йЂљ
 TW__Task_X(line) {
 	TW__Task_Y(line)
 }
 TW__Task_Y(line) {
-	If !GetKeyState("Alt") ; _—ќ”»’и‚ЕOK
+	If !GetKeyState("Alt") ; и«–зђ†е€¤е®љгЃ§OK
 		Send, {LAlt Down}
 	If line>0
 		Send, {Tab}
@@ -364,7 +364,7 @@ TW__Task_Post() {
 ;==========================
 ; Trans
 ;==========================
-; X‚ЖY‚Н‹¤’К
+; XгЃЁYгЃЇе…±йЂљ
 TW__Trans_X(line) {
 	TW__Trans_Y(line)
 }
@@ -386,11 +386,11 @@ TW__Trans_Post() {
 }
 
 ;=====================================================================
-; ѓXѓNѓЌЃ[ѓ‹ЏЂ”хЊn
+; г‚№г‚Їгѓ­гѓјгѓ«жє–е‚™зі»
 ;=====================================================================
 
-; ЏЂ”х‚р‚·‚й
-;   ѓXѓNѓЌЃ[ѓ‹•ы–@‚МЊ€’и‚Н‚±‚±‚ЕЌs‚¤
+; жє–е‚™г‚’гЃ™г‚‹
+;   г‚№г‚Їгѓ­гѓјгѓ«ж–№жі•гЃ®ж±єе®љгЃЇгЃ“гЃ“гЃ§иЎЊгЃ†
 TW_SetUp() {
 	global 
 	local RuleX,RuleY,str,SbState,style, w,h,h2,view, hitCode, LvState, $, $1, $2
@@ -398,13 +398,13 @@ TW_SetUp() {
 	
 	CoordMode, Mouse, Screen
 	MouseGetPos, TW_X, TW_Y, TW_HwndWin, TW_HwndCtrl, 3
-	TW_lParam := (TW_X < 0 ? TW_X + 0x10000 : TW_X) | (TW_Y < 0 ? TW_Y + 0x10000 : TW_Y)<<16 ; lParam‚НЊг‚ЙЌД——p
+	TW_lParam := (TW_X < 0 ? TW_X + 0x10000 : TW_X) | (TW_Y < 0 ? TW_Y + 0x10000 : TW_Y)<<16 ; lParamгЃЇеѕЊгЃ«е†Ќе€©з”Ё
 	
 	If (TW_HwndCtrl) {
 		SendMessage, 0x84, 0, TW_lParam,, ahk_id %TW_HwndCtrl% ; WM_NCHITTEST
 		If (ErrorLevel = "FAIL")
 			return false
-		else if (ErrorLevel==0xffffffff) ; •„Ќ†—L‚ѕ‚Ж -1
+		else if (ErrorLevel==0xffffffff) ; з¬¦еЏ·жњ‰гЃ гЃЁ -1
 			MouseGetPos,,,,TW_HwndCtrl,2
 	}
 	
@@ -415,11 +415,11 @@ TW_SetUp() {
 	
 	WinGet, style, Style, ahk_id %TW_HwndCtrl%
 	
-	; ЊВ•Кѓ‹Ѓ[ѓ‹ЊД‚СЏo‚µ
+	; еЂ‹е€Ґгѓ«гѓјгѓ«е‘јгЃіе‡єгЃ—
 	TW_LoadRule(TW_ClassWin, TW_ClassCtrl, RuleX, RuleY, TW_Option)
 	
-	TW_ParseOption(TW__$Option, TW_Accel, TW_SbOption) ; ѓfѓtѓH“З‚Э
-	TW_ParseOption(TW_Option, TW_Accel, TW_SbOption)   ; ЊВ•КЏгЏ‘‚«
+	TW_ParseOption(TW__$Option, TW_Accel, TW_SbOption) ; гѓ‡гѓ•г‚©иЄ­гЃї
+	TW_ParseOption(TW_Option, TW_Accel, TW_SbOption)   ; еЂ‹е€ҐдёЉж›ёгЃЌ
 	
 	TW_ReverseX:=false,TW_ReverseY:=false
 	If RegExMatch(RuleX, "^~(.+)$", $)
@@ -428,10 +428,10 @@ TW_SetUp() {
 		RuleY:=$1, TW_ReverseY:=true
 	
 	if (TW_HwndCtrl)
-		if !InStr(TW_ClassCtrl, "Mozzila") ; MDIЋq‘‹‚ѕ‚Б‚Ѕ‚зѓAѓNѓeѓBѓu‰»‚рЋЋ‚Э‚й
+		if !InStr(TW_ClassCtrl, "Mozzila") ; MDIе­ђзЄ“гЃ гЃЈгЃџг‚‰г‚ўг‚Їгѓ†г‚Јгѓ–еЊ–г‚’и©¦гЃїг‚‹
 			TW_MdiActivate(TW_HwndWin, TW_HwndCtrl)
 	
-	; ѓRѓ“ѓgѓЌЃ[ѓ‹‚Є‚И‚ў(Java‚Ж‚©)ЏкЌ‡‚НѓEѓBѓ“ѓhѓEѓnѓ“ѓhѓ‹‚Ж‚·‚й
+	; г‚ігѓігѓ€гѓ­гѓјгѓ«гЃЊгЃЄгЃ„(JavaгЃЁгЃ‹)е ґеђ€гЃЇг‚¦г‚Јгѓігѓ‰г‚¦гѓЏгѓігѓ‰гѓ«гЃЁгЃ™г‚‹
 	if (!TW_HwndCtrl)
 		TW_HwndCtrl := TW_HwndWin
 	
@@ -462,42 +462,42 @@ TW_ParseOption(Byref option, ByRef accel, ByRef scroll) {
 	SetFormat, Integer, %afi%
 }
 
-; (Џd—v) ѓXѓNѓЌЃ[ѓ‹•ыЋ®‚МЊ€’и
-;   —Dђж“x: ЊВ•КђЭ’и > ѓfѓtѓHѓ‹ѓgђЭ’и > ѓЉѓXѓgѓrѓ…Ѓ[”»’и > ѓXѓNѓЌЃ[ѓ‹ѓoЃ[”»’и > ѓzѓCЃ[ѓ‹
+; (й‡Ќи¦Ѓ) г‚№г‚Їгѓ­гѓјгѓ«ж–№ејЏгЃ®ж±єе®љ
+;   е„Єе…€еє¦: еЂ‹е€ҐиЁ­е®љ > гѓ‡гѓ•г‚©гѓ«гѓ€иЁ­е®љ > гѓЄг‚№гѓ€гѓ“гѓҐгѓје€¤е®љ > г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓје€¤е®љ > гѓ›г‚¤гѓјгѓ«
 TW_DefineRule(iniRule, defRule, isListView, SbState) {
 	global TW__DefaultS2
-	return iniRule ? iniRule                                ; Iniѓtѓ@ѓCѓ‹‚Й‚ ‚йѓ‹Ѓ[ѓ‹
-		: defRule ? defRule                                   ; IniЏг‚МѓfѓtѓHѓ‹ѓgѓ‹Ѓ[ѓ‹
-		: (isListView) ? "LView"                              ; ѓЉѓXѓgѓrѓ…Ѓ[”»’и
-		: SbState ? (TW__DefaultS2  ? "Scroll2" : "Scroll")   ; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[”»’и
-		: "Wheel"                                             ; ѓzѓCЃ[ѓ‹
+	return iniRule ? iniRule                                ; Iniгѓ•г‚Ўг‚¤гѓ«гЃ«гЃ‚г‚‹гѓ«гѓјгѓ«
+		: defRule ? defRule                                   ; IniдёЉгЃ®гѓ‡гѓ•г‚©гѓ«гѓ€гѓ«гѓјгѓ«
+		: (isListView) ? "LView"                              ; гѓЄг‚№гѓ€гѓ“гѓҐгѓје€¤е®љ
+		: SbState ? (TW__DefaultS2  ? "Scroll2" : "Scroll")   ; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓје€¤е®љ
+		: "Wheel"                                             ; гѓ›г‚¤гѓјгѓ«
 }
 
 TW_CreatePseudoClass(code) {
-	return ((code ==  0) ? "$_NoWhere"      ; HTNOWHERE     ; ѓfѓXѓNѓgѓbѓvЏг‚Й‚ ‚й
-;			 : (code ==  1) ?  "$_Client"       ; HTCLIENT      ; ѓNѓ‰ѓCѓAѓ“ѓg—М€ж“а‚Й‚ ‚й
-			 : (code ==  2) ?  "$_Caption"      ; HTCAPTION     ; ѓLѓѓѓvѓVѓ‡ѓ“ѓoЃ[Џг‚Й‚ ‚й
-			 : (code ==  3) ?  "$_SysMenu"      ; HTSYSMENU     ; ѓVѓXѓeѓЂѓЃѓjѓ…Ѓ[“а‚Й‚ ‚й
-			 : (code ==  4) ?  "$_Size"         ; HTSIZE        ; ѓTѓCѓYѓ{ѓbѓNѓX“а‚Й‚ ‚й
-			 : (code ==  5) ?  "$_Menu"         ; HTMENU        ; ѓЃѓjѓ…Ѓ[ѓoЃ[“а‚Й‚ ‚й
-			 : (code ==  6) ?  "$_HScrool"      ; HTHSCROOL     ; ђ…•ЅѓXѓNѓЌЃ[ѓ‹ѓoЃ[“а‚Й‚ ‚й
-			 : (code ==  7) ?  "$_VScroll"      ; HTVSCROLL     ; ђ‚’јѓXѓNѓЌЃ[ѓ‹ѓoЃ[“а‚Й‚ ‚й
-			 : (code ==  8) ?  "$_MinButton"    ; HTMINBUTTON   ; ѓAѓCѓRѓ“‰»ѓ{ѓ^ѓ“Џг‚Й‚ ‚й
-			 : (code ==  9) ?  "$_MaxButton"    ; HTMAXBUTTON   ; ЌЕ‘е‰»ѓ{ѓ^ѓ“Џг‚Й‚ ‚й
-			 : (code == 10) ?  "$_Border"       ; HTLEFT        ; ‰В•Пg‚МЌ¶•У‹«ЉEђьЏг‚Й‚ ‚й
-			 : (code == 11) ?  "$_Border"       ; HTRIGHT       ; ‰В•Пg‚М‰E•У‹«ЉEђьЏг‚Й‚ ‚й
-			 : (code == 12) ?  "$_Border"       ; HTTOP         ; ‰В•Пg‚МЏг•У‹«ЉEђьЏг‚Й‚ ‚й
-			 : (code == 13) ?  "$_Border"       ; HTTOPLEFT     ; ‰В•Пg‚МЌ¶Џг‹ч‚Й‚ ‚й
-			 : (code == 14) ?  "$_Border"       ; HTTOPRIGHT    ; ‰В•Пg‚М‰EЏг‹ч‚Й‚ ‚й
-			 : (code == 15) ?  "$_Border"       ; HTBOTTOM      ; ‰В•Пg‚М‰є•У‹«ЉEђьЏг‚Й‚ ‚й
-			 : (code == 16) ?  "$_Border"       ; HTBOTTOMLEFT  ; “ЇЃAЌ¶‰є‹ч‚Й‚ ‚й
-			 : (code == 17) ?  "$_Border"       ; HTBOTTOMRIGHT ; “ЇЃA‰E‰є‹ч‚Й‚ ‚й
-			 : (code == 18) ?  "$_Border"       ; HTBORDER      ; ‰В•Пg‚рЋќ‚Ѕ‚И‚ў‹«ЉEђьЏг‚Й‚ ‚й
-			 : (code == 20) ?  "$_CloseButton"  ; HTCLOSEBUTTON ; ђ‚’јѓXѓNѓЌЃ[ѓ‹ѓoЃ[“а‚Й‚ ‚й
+	return ((code ==  0) ? "$_NoWhere"      ; HTNOWHERE     ; гѓ‡г‚№г‚Їгѓ€гѓѓгѓ—дёЉгЃ«гЃ‚г‚‹
+;			 : (code ==  1) ?  "$_Client"       ; HTCLIENT      ; г‚Їгѓ©г‚¤г‚ўгѓігѓ€й еџџе†…гЃ«гЃ‚г‚‹
+			 : (code ==  2) ?  "$_Caption"      ; HTCAPTION     ; г‚­гѓЈгѓ—г‚·гѓ§гѓігѓђгѓјдёЉгЃ«гЃ‚г‚‹
+			 : (code ==  3) ?  "$_SysMenu"      ; HTSYSMENU     ; г‚·г‚№гѓ†гѓ гѓЎгѓ‹гѓҐгѓје†…гЃ«гЃ‚г‚‹
+			 : (code ==  4) ?  "$_Size"         ; HTSIZE        ; г‚µг‚¤г‚єгѓњгѓѓг‚Їг‚№е†…гЃ«гЃ‚г‚‹
+			 : (code ==  5) ?  "$_Menu"         ; HTMENU        ; гѓЎгѓ‹гѓҐгѓјгѓђгѓје†…гЃ«гЃ‚г‚‹
+			 : (code ==  6) ?  "$_HScrool"      ; HTHSCROOL     ; ж°ґе№іг‚№г‚Їгѓ­гѓјгѓ«гѓђгѓје†…гЃ«гЃ‚г‚‹
+			 : (code ==  7) ?  "$_VScroll"      ; HTVSCROLL     ; ећ‚з›ґг‚№г‚Їгѓ­гѓјгѓ«гѓђгѓје†…гЃ«гЃ‚г‚‹
+			 : (code ==  8) ?  "$_MinButton"    ; HTMINBUTTON   ; г‚ўг‚¤г‚ігѓіеЊ–гѓњг‚їгѓідёЉгЃ«гЃ‚г‚‹
+			 : (code ==  9) ?  "$_MaxButton"    ; HTMAXBUTTON   ; жњЂе¤§еЊ–гѓњг‚їгѓідёЉгЃ«гЃ‚г‚‹
+			 : (code == 10) ?  "$_Border"       ; HTLEFT        ; еЏЇе¤‰жћ гЃ®е·¦иѕєеўѓз•Њз·љдёЉгЃ«гЃ‚г‚‹
+			 : (code == 11) ?  "$_Border"       ; HTRIGHT       ; еЏЇе¤‰жћ гЃ®еЏіиѕєеўѓз•Њз·љдёЉгЃ«гЃ‚г‚‹
+			 : (code == 12) ?  "$_Border"       ; HTTOP         ; еЏЇе¤‰жћ гЃ®дёЉиѕєеўѓз•Њз·љдёЉгЃ«гЃ‚г‚‹
+			 : (code == 13) ?  "$_Border"       ; HTTOPLEFT     ; еЏЇе¤‰жћ гЃ®е·¦дёЉйљ…гЃ«гЃ‚г‚‹
+			 : (code == 14) ?  "$_Border"       ; HTTOPRIGHT    ; еЏЇе¤‰жћ гЃ®еЏідёЉйљ…гЃ«гЃ‚г‚‹
+			 : (code == 15) ?  "$_Border"       ; HTBOTTOM      ; еЏЇе¤‰жћ гЃ®дё‹иѕєеўѓз•Њз·љдёЉгЃ«гЃ‚г‚‹
+			 : (code == 16) ?  "$_Border"       ; HTBOTTOMLEFT  ; еђЊгЂЃе·¦дё‹йљ…гЃ«гЃ‚г‚‹
+			 : (code == 17) ?  "$_Border"       ; HTBOTTOMRIGHT ; еђЊгЂЃеЏідё‹йљ…гЃ«гЃ‚г‚‹
+			 : (code == 18) ?  "$_Border"       ; HTBORDER      ; еЏЇе¤‰жћ г‚’жЊЃгЃџгЃЄгЃ„еўѓз•Њз·љдёЉгЃ«гЃ‚г‚‹
+			 : (code == 20) ?  "$_CloseButton"  ; HTCLOSEBUTTON ; ећ‚з›ґг‚№г‚Їгѓ­гѓјгѓ«гѓђгѓје†…гЃ«гЃ‚г‚‹
 			 : "")
 }
 
-; ѓoѓCѓpѓX‚Мѓ`ѓFѓbѓNЃAЌ‡’v‚µ‚Ѕ‚зЋQЏЖ‚р•П‚¦‚й
+; гѓђг‚¤гѓ‘г‚№гЃ®гѓЃг‚§гѓѓг‚ЇгЂЃеђ€и‡ґгЃ—гЃџг‚‰еЏ‚з…§г‚’е¤‰гЃ€г‚‹
 TW_BypassCheck(ByRef hCtrl, ByRef hWindow, ByRef cCtrl, ByRef cWindow) {
 	global TW__Bypass,TW_Bypassed
 	SetFormat, Integer, H
@@ -515,7 +515,7 @@ TW_BypassCheck(ByRef hCtrl, ByRef hWindow, ByRef cCtrl, ByRef cWindow) {
 	}
 }
 
-; ѓfѓoѓbѓO•\Ћ¦—p
+; гѓ‡гѓђгѓѓг‚°иЎЁз¤єз”Ё
 TW_ShowDebug() {
 	global
 	local str,revH,revV
@@ -539,14 +539,14 @@ PX,PY	%TW_PX%`t%TW_PY%
 		TrayTip, TrackWheel, %str%, 10,17
 }
 
-; ЊгЏ€—ќ—pЉЦђ”ЃB—\–с‚µ‚Д‚й‚ѕ‚Ї‚Б‚ДЉґ‚¶ЃB
+; еѕЊе‡¦зђ†з”Ёй–ўж•°гЂ‚дє€зґ„гЃ—гЃ¦г‚‹гЃ гЃ‘гЃЈгЃ¦ж„џгЃгЂ‚
 TW_TearDown() {
 	global
 	Tooltip
 	return true
 }
 
-; ѓЃѓ‚ѓЉЏг‚ЙѓЌЃ[ѓh‚µ‚ЅђЭ’иѓtѓ@ѓCѓ‹‚рѓOѓ‹ѓOѓ‹‰с‚µ‚Дѓ}ѓbѓ`ѓ“ѓO
+; гѓЎгѓўгѓЄдёЉгЃ«гѓ­гѓјгѓ‰гЃ—гЃџиЁ­е®љгѓ•г‚Ўг‚¤гѓ«г‚’г‚°гѓ«г‚°гѓ«е›ћгЃ—гЃ¦гѓћгѓѓгѓЃгѓіг‚°
 TW_LoadRule(classWin, classCtrl, ByRef RuleX, ByRef RuleY, ByRef Option) {
 	global TW__RuleTable, TW_SX,TW_SY,TW_TX,TW_TY,TW_PX,TW_PY
 		,TW__$SX,TW__$SY,TW__$TX,TW__$TY,TW__$PX,TW__$PY
@@ -566,7 +566,7 @@ TW_LoadRule(classWin, classCtrl, ByRef RuleX, ByRef RuleY, ByRef Option) {
 		idx:=A_Index+4, TW_%A_LoopField%:=(col%idx%) ? col%idx% : TW__$%A_LoopField%
 }
 
-; ѓЏѓCѓ‹ѓhѓJЃ[ѓhѓ}ѓbѓ`ѓ“ѓOЉЦђ”
+; гѓЇг‚¤гѓ«гѓ‰г‚«гѓјгѓ‰гѓћгѓѓгѓЃгѓіг‚°й–ўж•°
 TW_WildCardMatches(pattern, value) {
 	if (pattern == "")
 		return (value=="")
@@ -578,12 +578,12 @@ TW_WildCardMatches(pattern, value) {
 		: (mode == 1) ? (InStr(value, pattern) == 1) : (value = pattern)
 }
 
-; MDIЋq‘‹ѓAѓNѓeѓBѓu‰»
-;   ѓEѓBѓ“ѓhѓEѓXѓ^ѓCѓ‹‚рЊ©‚ДMDIЋq‘‹‚ѕ‚Б‚Ѕ‚зѓAѓNѓeѓBѓu‰»‚рЋЋ‚Э‚й
-;   €к‰ћЃA€кЉK‘wЏг‚Ь‚Е–К“|‚рЊ©‚Д‚в‚й
+; MDIе­ђзЄ“г‚ўг‚Їгѓ†г‚Јгѓ–еЊ–
+;   г‚¦г‚Јгѓігѓ‰г‚¦г‚№г‚їг‚¤гѓ«г‚’и¦‹гЃ¦MDIе­ђзЄ“гЃ гЃЈгЃџг‚‰г‚ўг‚Їгѓ†г‚Јгѓ–еЊ–г‚’и©¦гЃїг‚‹
+;   дёЂеїњгЂЃдёЂйљЋе±¤дёЉгЃѕгЃ§йќўеЂ’г‚’и¦‹гЃ¦г‚„г‚‹
 TW_MdiActivate(hwnd, ctrl) {
 	target := ctrl
-	Loop, 2 { ;€к’iЉKЏг‚Ь‚ЕЊ©‚Д‚в‚й‚±‚Ж‚Й‚·‚й
+	Loop, 2 { ;дёЂж®µйљЋдёЉгЃѕгЃ§и¦‹гЃ¦г‚„г‚‹гЃ“гЃЁгЃ«гЃ™г‚‹
 		if (target == hwnd || !WinExist("ahk_id " . target))
 			break
 		WinGet, style, Style
@@ -601,25 +601,25 @@ TW_MdiActivate(hwnd, ctrl) {
 }
 
 ;=====================================================================
-; Џ‰Љъ‰»ЉЦA
+; е€ќжњџеЊ–й–ўйЂЈ
 ;=====================================================================
 
-; Џ‰Љъ‰»
-;   ѓRЃ[ѓ‹ѓoѓbѓNЉЦђ”‚М“o^‚Ж‚©ЃA“а•”ѓЃѓbѓZЃ[ѓW‚МђЭ’и‚Ж‚©
-;   ЉeЋн•Пђ”‚МЏ‰Љъ‰»‚Ж‚©
+; е€ќжњџеЊ–
+;   г‚ігѓјгѓ«гѓђгѓѓг‚Їй–ўж•°гЃ®з™»йЊІгЃЁгЃ‹гЂЃе†…йѓЁгѓЎгѓѓг‚»гѓјг‚ёгЃ®иЁ­е®љгЃЁгЃ‹
+;   еђ„зЁ®е¤‰ж•°гЃ®е€ќжњџеЊ–гЃЁгЃ‹
 TW_Initialize(file="TW.ini", trayIcon=false) {
 	global 
 	local dir, msg, hHookProc
-	; ѓtѓbѓNѓvѓЌѓVЃ[ѓWѓѓЏ‰Љъ‰»
+	; гѓ•гѓѓг‚Їгѓ—гѓ­г‚·гѓјг‚ёгѓЈе€ќжњџеЊ–
 	msg := DllCall("RegisterWindowMessage", "Str","TrackWheelCallbackMsg")
-	hHookProc := RegisterCallback("TW_MouseLL", "", 3, msg) ; ‘ж3€шђ”‚НѓtѓbѓNѓvѓЌѓVЃ[ѓWѓѓ‚МA_EventInfo‚ЕЋж‚иЏo‚№‚й
+	hHookProc := RegisterCallback("TW_MouseLL", "", 3, msg) ; з¬¬3еј•ж•°гЃЇгѓ•гѓѓг‚Їгѓ—гѓ­г‚·гѓјг‚ёгѓЈгЃ®A_EventInfoгЃ§еЏ–г‚Ље‡єгЃ›г‚‹
 	TW_hHook:= DllCall("SetWindowsHookEx"
 		, "Int",  0x0E                                  ; Mouse_LL
 		, "UInt", hHookProc                             ; 
 		, "UInt", DllCall("GetModuleHandle", "UInt",0)  ; 
 		, "UInt", 0)                                    ; 0:Global
 	OnMessage(msg, "TW_MsgListener", 1)
-	; •Пђ”Џ‰Љъ‰»
+	; е¤‰ж•°е€ќжњџеЊ–
 	dir := A_WorkingDir
 	SetWorkingDir, % RegExReplace(A_LineFile, "\\[^\\]+$","")
 	TW__DiffCount:=4
@@ -642,12 +642,12 @@ TW_IniRead(file, name, section="config") {
 	return value != "ERROR" ? value : ""
 }
 
-; ђЭ’иѓtѓ@ѓCѓ‹“З‚ЭЌћ‚Э
+; иЁ­е®љгѓ•г‚Ўг‚¤гѓ«иЄ­гЃїиѕјгЃї
 TW_LoadFile(file) {
 	global
 	local $,$1,$2, section, value
 	TW__RuleTable := "", section:=""
-	; [config] ѓZѓNѓVѓ‡ѓ““З‚ЭЌћ‚Э
+	; [config] г‚»г‚Їг‚·гѓ§гѓіиЄ­гЃїиѕјгЃї
 	if (value:=TW_IniRead(file, "Hotkey"))
 		Hotkey, %value%, TW_HotkeyStart, On
 	TW__Timeout       := TW_IniRead(file, "Timeout")
@@ -668,25 +668,25 @@ TW_LoadFile(file) {
 			TW__RuleTable .= (TW__RuleTable ? "`n" : "") . A_LoopReadLine
 }
 
-; ’КЏн‚МѓAѓvѓЉђЭ’и‚Ж“Ї‚¶•ы–@‚ЕѓЌЃ[ѓh‚µ‚ДЃAѓfѓtѓHѓ‹ѓg•Пђ”‚ЦѓZѓbѓg
-; Ћw’и‚Є‚И‚Ї‚к‚О‚±‚±‚Е’l‚рђЭ’и‚·‚й
+; йЂљеёёгЃ®г‚ўгѓ—гѓЄиЁ­е®љгЃЁеђЊгЃж–№жі•гЃ§гѓ­гѓјгѓ‰гЃ—гЃ¦гЂЃгѓ‡гѓ•г‚©гѓ«гѓ€е¤‰ж•°гЃёг‚»гѓѓгѓ€
+; жЊ‡е®љгЃЊгЃЄгЃ‘г‚ЊгЃ°гЃ“гЃ“гЃ§еЂ¤г‚’иЁ­е®љгЃ™г‚‹
 TW_SetDefault() {
 	global
 	TW_LoadRule("$Default", "$Default", TW__$RuleX,TW__$RuleY,TW__$Option)
-	,TW__$SX := TW_SX ? TW_SX : 10 ; XЋІЉґ“xѓfѓtѓHѓ‹ѓg
-	,TW__$SY := TW_SY ? TW_SY : 10 ; YЋІЉґ“x    ЃV
-	,TW__$TX := TW_TX ? TW_TX : 10 ; XЋІ“®Ќми‡’lѓfѓtѓHѓ‹ѓg
-	,TW__$TY := TW_TY ? TW_TY : 1  ; YЋІ“®Ќми‡’l    ЃV
-	,TW__$PX := TW_PX ? TW_PX : 8  ; XЋІѓyЃ[ѓWѓ‚Ѓ[ѓhи‡’lѓfѓtѓHѓ‹ѓg
-	,TW__$PY := TW_PY ? TW_PY : 8  ; YЋІѓyЃ[ѓWѓ‚Ѓ[ѓhи‡’l    ЃV
+	,TW__$SX := TW_SX ? TW_SX : 10 ; Xи»ёж„џеє¦гѓ‡гѓ•г‚©гѓ«гѓ€
+	,TW__$SY := TW_SY ? TW_SY : 10 ; Yи»ёж„џеє¦    гЂѓ
+	,TW__$TX := TW_TX ? TW_TX : 10 ; Xи»ёе‹•дЅњй–ѕеЂ¤гѓ‡гѓ•г‚©гѓ«гѓ€
+	,TW__$TY := TW_TY ? TW_TY : 1  ; Yи»ёе‹•дЅњй–ѕеЂ¤    гЂѓ
+	,TW__$PX := TW_PX ? TW_PX : 8  ; Xи»ёгѓљгѓјг‚ёгѓўгѓјгѓ‰й–ѕеЂ¤гѓ‡гѓ•г‚©гѓ«гѓ€
+	,TW__$PY := TW_PY ? TW_PY : 8  ; Yи»ёгѓљгѓјг‚ёгѓўгѓјгѓ‰й–ѕеЂ¤    гЂѓ
 }
 
 ;=====================================================================
-; GUI“™‰ж–К•\Ћ¦ЉЦA
+; GUIз­‰з”»йќўиЎЁз¤єй–ўйЂЈ
 ;=====================================================================
 
-; GUIЏ‰Љъ‰»
-;   ‘O‚М‚Ж“Ї‚¶ЃB
+; GUIе€ќжњџеЊ–
+;   е‰ЌгЃ®гЃЁеђЊгЃгЂ‚
 TW_GuiInit() {
 	global TW__GuiNo, TW__GuiHwnd, TW__Icon
 	TW__GuiNo := 0
@@ -719,13 +719,13 @@ TW_GuiShow(show) {
 		Gui, Hide
 }
 
-; ‘ЂЌм‘ОЏЫ‚МѓXѓЊѓbѓh‚ЙѓAѓ^ѓbѓ`‚µ‚Дѓ}ѓEѓXѓJЃ[ѓ\ѓ‹‚М”с•\Ћ¦ЃE•\Ћ¦‚рђ§Њд‚·‚й
+; ж“ЌдЅњеЇѕи±ЎгЃ®г‚№гѓ¬гѓѓгѓ‰гЃ«г‚ўг‚їгѓѓгѓЃгЃ—гЃ¦гѓћг‚¦г‚№г‚«гѓјг‚Ѕгѓ«гЃ®йќћиЎЁз¤єгѓ»иЎЁз¤єг‚’е€¶еѕЎгЃ™г‚‹
 TW_CursorHide(hide) {
 	global TW_HwndWin, TW__NoHide, TW_ClassWin
 	static myThread, targetThread
 	if (TW__NoHide)
 		return true
-	if (TW_ClassWin = "#32769") ; #32769‚Н crss.exe (SYSTEMѓ†Ѓ[ѓU) ‚МPopup
+	if (TW_ClassWin = "#32769") ; #32769гЃЇ crss.exe (SYSTEMгѓ¦гѓјг‚¶) гЃ®Popup
 		return true
 	if (hide) {
 		if (targetThread)
@@ -733,7 +733,7 @@ TW_CursorHide(hide) {
 		myThread := DllCall("kernel32.dll\GetCurrentThreadId", "UInt")
 		targetThread := DllCall("user32.dll\GetWindowThreadProcessId", "UInt",TW_HwndWin, "Uint",0, "UInt")
 		if (myThread == targetThread)
-			targetThread := 0 ; Ћ©•ЄЋ©ђM‚И‚зѓAѓ^ѓbѓ`‚·‚й•K—v‚И‚ў
+			targetThread := 0 ; и‡Єе€†и‡ЄдїЎгЃЄг‚‰г‚ўг‚їгѓѓгѓЃгЃ™г‚‹еї…и¦ЃгЃЄгЃ„
 		else if (!DllCall("user32.dll\AttachThreadInput", "UInt",myThread, "UInt",targetThread, "Int",-1))
 			targetThread := 0
 		Loop
@@ -750,37 +750,37 @@ TW_CursorHide(hide) {
 }
 
 ;=====================================================================
-; ѓЉѓXѓgѓrѓ…Ѓ[—pѓ`ѓFѓbѓN
+; гѓЄг‚№гѓ€гѓ“гѓҐгѓјз”ЁгѓЃг‚§гѓѓг‚Ї
 ;=====================================================================
 TW_IsListView(hwnd) {
 	global TW_LvLineX, TW_LvLineY
-	state:=SendMessage(hwnd, 0x1014, 0, 0) ; ; LVM_SCROLL‚Е (0,0) “®‚©‚µ‚Д‚Э‚й
+	state:=SendMessage(hwnd, 0x1014, 0, 0) ; ; LVM_SCROLLгЃ§ (0,0) е‹•гЃ‹гЃ—гЃ¦гЃїг‚‹
 	If (state="FAIL" || !state)
 		return false
 	return true
 }
 
 ;=====================================================================
-; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[ЉЦA
+; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјй–ўйЂЈ
 ;=====================================================================
 
-; WM_HSCROLL/WM_VSCROLL‚Й”Ѕ‰ћ‚·‚й‚©‚З‚¤‚©‚р’І‚Ч‚й‚Ж‚Ж‚а‚ЙЃA
-; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[‚МѓEѓBѓ“ѓhѓEѓnѓ“ѓhѓ‹‚рЋж“ѕ‚·‚йЃB
-; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[‚ЄЋ©•Є‚М”z‰є‚Й–і‚ўЏкЌ‡€кЉK‘wЏг(“Ї—с)‚МѓXѓNѓЌЃ[ѓ‹ѓoЃ[‚р’T‚·
-; <strike>‘Ѕ•Є”Д—p“I</strike> ЃЁ ‚а‚¤Ќ\‘ў‘М‚И‚µ‚¶‚б...
+; WM_HSCROLL/WM_VSCROLLгЃ«еЏЌеїњгЃ™г‚‹гЃ‹гЃ©гЃ†гЃ‹г‚’иЄїгЃ№г‚‹гЃЁгЃЁг‚‚гЃ«гЂЃ
+; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјгЃ®г‚¦г‚Јгѓігѓ‰г‚¦гѓЏгѓігѓ‰гѓ«г‚’еЏ–еѕ—гЃ™г‚‹гЂ‚
+; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјгЃЊи‡Єе€†гЃ®й…Ќдё‹гЃ«з„ЎгЃ„е ґеђ€дёЂйљЋе±¤дёЉ(еђЊе€—)гЃ®г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјг‚’жЋўгЃ™
+; <strike>е¤ље€†ж±Ћз”Ёзљ„</strike> в†’ г‚‚гЃ†ж§‹йЂ дЅ“гЃЄгЃ—гЃг‚ѓ...
 ; 
-; –Я‚и’l(€И‰є‚МOR’l)
-; 	0 : ѓXѓNѓЌЃ[ѓ‹•s‰В
-; 	1 : ђ…•ЅѓXѓNѓЌЃ[ѓ‹‰В”\
-; 	2 : ђ‚’јѓXѓNѓЌЃ[ѓ‹‰В”\
+; ж€»г‚ЉеЂ¤(д»Ґдё‹гЃ®ORеЂ¤)
+; 	0 : г‚№г‚Їгѓ­гѓјгѓ«дёЌеЏЇ
+; 	1 : ж°ґе№іг‚№г‚Їгѓ­гѓјгѓ«еЏЇиѓЅ
+; 	2 : ећ‚з›ґг‚№г‚Їгѓ­гѓјгѓ«еЏЇиѓЅ
 TW_FindScrollBar(sX, sY, ctrl) {
 	global TW_X, TW_Y, TW_HwndCtrl
 	static SC_HSCROLL:=1,SC_VSCROLL:=2,SB_HORZ:=0,SB_VERT:=1,SB_CTL:=2
 		,SBS_VERT:=0x01,SBS_HORZ:=0,WS_VSCROLL:=0x00200000,WS_HSCROLL:=0x00100000
 	retValue:=0
-	,TW_SCROLLBAR_H_Set(SB_HORZ, 0, ctrl) ; ‘ОЏЫѓRѓ“ѓgѓЌЃ[ѓ‹‚МЏо•с‚ЕЏ‰Љъ‰»
+	,TW_SCROLLBAR_H_Set(SB_HORZ, 0, ctrl) ; еЇѕи±Ўг‚ігѓігѓ€гѓ­гѓјгѓ«гЃ®жѓ…е ±гЃ§е€ќжњџеЊ–
 	,TW_SCROLLBAR_V_Set(SB_VERT, 0, ctrl)
-	; ‘ОЏЫѓRѓ“ѓgѓЌЃ[ѓ‹Ћ©‘М‚ЄѓXѓNѓЌЃ[ѓ‹‚Е‚«‚й‚©‚З‚¤‚©‚рѓ`ѓFѓbѓN
+	; еЇѕи±Ўг‚ігѓігѓ€гѓ­гѓјгѓ«и‡ЄдЅ“гЃЊг‚№г‚Їгѓ­гѓјгѓ«гЃ§гЃЌг‚‹гЃ‹гЃ©гЃ†гЃ‹г‚’гѓЃг‚§гѓѓг‚Ї
 	retValue := TW_GetScrollInfoAll(ctrl, SB_HORZ) | TW_GetScrollInfoAll(ctrl, SB_VERT)<<1
 	if (retValue)
 		return retValue
@@ -796,28 +796,28 @@ TW_FindScrollBar(sX, sY, ctrl) {
 			WinGetPos, x,y,w,h, ahk_id %sbHwnd%
 			if (InStr(A_LoopField, "ScrollBar")==1) {
 				if (style & SBS_VERT) { ; SBS_VERT
-					if (cX > x || cY > (y+h)) ; PowerPointЌ¶ѓyѓCѓ“ЏњЉO—p
+					if (cX > x || cY > (y+h)) ; PowerPointе·¦гѓљг‚¤гѓій™¤е¤–з”Ё
 						continue
 					if (!(retValue & 2))
-							|| ((vY!=y)&&((y<sY)&&(vY<y))||((vY>sY)&&(vY>y)))   ;Џг‰є•ЄЉ„
-							|| ((vX!=x)&&((x>sX)&&(vX>x))||((vX<sX)&&(vX<x)))   ;Ќ¶‰E•ЄЉ„
+							|| ((vY!=y)&&((y<sY)&&(vY<y))||((vY>sY)&&(vY>y)))   ;дёЉдё‹е€†е‰І
+							|| ((vX!=x)&&((x>sX)&&(vX>x))||((vX<sX)&&(vX<x)))   ;е·¦еЏіе€†е‰І
 						vX:=x,vY:=y,vW:=w,vH:=h ;,VShwnd:=sbHwnd
 						,TW_SCROLLBAR_V_Set(SB_CTL, sbHwnd, DllCall("GetParent", "UInt", sbHwnd)), retValue |= 2
 				} else {
-					if ((y+h) < sY || (cX+cW)<x) ; PowerPointѓmЃ[ѓg—“/Ќ¶ѓyѓCѓ“ЏњЉO—p
+					if ((y+h) < sY || (cX+cW)<x) ; PowerPointгѓЋгѓјгѓ€ж¬„/е·¦гѓљг‚¤гѓій™¤е¤–з”Ё
 						continue
 					if (!(retValue & 1))
-							|| ((hX!=x)&&((x<sX)&&(hX<x))||((hX>sX)&&(hX>x)))      ;Ќ¶‰E(ExcelЊ^)
-							|| ((hY!=y)&&((y+h>sY)&&(hY>y))||((hY+hH<sY)&&(hY<y))) ;Џг‰є(WordЊ^)
+							|| ((hX!=x)&&((x<sX)&&(hX<x))||((hX>sX)&&(hX>x)))      ;е·¦еЏі(Excelећ‹)
+							|| ((hY!=y)&&((y+h>sY)&&(hY>y))||((hY+hH<sY)&&(hY<y))) ;дёЉдё‹(Wordећ‹)
 						hX:=x,hY:=y,hW:=w,hH:=h ;, HShwnd:=sbHwnd
 						,TW_SCROLLBAR_H_Set(SB_CTL, sbHwnd, DllCall("GetParent", "UInt", sbHwnd)), retValue |= 1
 				}
-			} else if (InStr(A_LoopField, "CScrollBar")==1) { ; ‚Щ‚Ъ Access2002—pЃA‚©‚И‚иЋи”І‚«
-				if (style & WS_HSCROLL) && !(retValue & 0x1) ; ЌЕЏ‰‚ЙЊ©‚В‚©‚Б‚Ѕ‰Ў—v‘f
+			} else if (InStr(A_LoopField, "CScrollBar")==1) { ; гЃ»гЃј Access2002з”ЁгЂЃгЃ‹гЃЄг‚Љж‰‹жЉњгЃЌ
+				if (style & WS_HSCROLL) && !(retValue & 0x1) ; жњЂе€ќгЃ«и¦‹гЃ¤гЃ‹гЃЈгЃџжЁЄи¦Ѓзґ 
 					TW_SCROLLBAR_H_Set(SB_HORZ, 0, sbHwnd), retValue |= 1
-				if (style & WS_VSCROLL) && !(retValue & 0x2) ; ЌЕЏ‰‚ЙЊ©‚В‚©‚Б‚ЅЏc—v‘f
+				if (style & WS_VSCROLL) && !(retValue & 0x2) ; жњЂе€ќгЃ«и¦‹гЃ¤гЃ‹гЃЈгЃџзё¦и¦Ѓзґ 
 					TW_SCROLLBAR_V_Set(SB_VERT, 0, sbHwnd), retValue |= 2
-			} else if (InStr(A_LoopField, "TScrollBox")==1) { ; Jane ‚М ViewerЊь‚Ї)
+			} else if (InStr(A_LoopField, "TScrollBox")==1) { ; Jane гЃ® Viewerеђ‘гЃ‘)
 				TW_SCROLLBAR_H_Set(SB_HORZ, 0, sbHwnd), retValue |= 1
 				TW_SCROLLBAR_V_Set(SB_VERT, 0, sbHwnd), retValue |= 2
 				break
@@ -834,7 +834,7 @@ TW_FindScrollBar(sX, sY, ctrl) {
 	return retValue
 }
 
-; –К“|‚И‚М‚Е‚Ь‚Ж‚Я‚ДѓZѓbѓg‚·‚йЃB
+; йќўеЂ’гЃЄгЃ®гЃ§гЃѕгЃЁг‚ЃгЃ¦г‚»гѓѓгѓ€гЃ™г‚‹гЂ‚
 TW_SCROLLBAR_H_Set(type, sbHwnd, target) {
 	global
 	TW_SbXType:=type, TW_SbXHwnd:=sbHwnd, TW_SbXTarget:=target
@@ -844,7 +844,7 @@ TW_SCROLLBAR_V_Set(type, sbHwnd, target) {
 	TW_SbYType:=type, TW_SbYHwnd:=sbHwnd, TW_SbYTarget:=target
 }
 
-; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[‚МЏо•с‚р“ѕ‚й
+; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјгЃ®жѓ…е ±г‚’еѕ—г‚‹
 TW_GetScrollInfoAll(hwnd, type, ByRef nMin=0, ByRef nMax=0, ByRef nPage=0, ByRef nPos=0, ByRef nTrackPos=0) {
 	size:=VarSetCapacity(SCROLLINFO, 28, 0x00)
 	NumPut(28,   SCROLLINFO, 0, "Int")
@@ -857,7 +857,7 @@ TW_GetScrollInfoAll(hwnd, type, ByRef nMin=0, ByRef nMax=0, ByRef nPage=0, ByRef
 	return true
 }
 
-; ѓXѓNѓЌЃ[ѓ‹ѓoЃ[Џо•с‚рЌXђV‚·‚й
+; г‚№г‚Їгѓ­гѓјгѓ«гѓђгѓјжѓ…е ±г‚’ж›ґж–°гЃ™г‚‹
 TW_SetScrollInfoAll(hwnd, type, nMin, nMax,nPage,nPos,nTrackPos) {
 	size:=VarSetCapacity(SCROLLINFO, 28, 0x00)
 	,NumPut(size,     SCROLLINFO, 0, "Int")
@@ -877,7 +877,7 @@ SendMessage(hwnd, msg, wParam, lParam) {
 TW__Max(a,b) {
 	return (a>b) ? a : b
 }
-; ѓJѓЊѓ“ѓgѓfѓBѓЊѓNѓgѓЉ‚рЌl—¶‚µ‚ЅЋw’и‚МѓpѓX‚рЃAѓhѓ‰ѓCѓuѓ‹Ѓ[ѓg‚©‚з‚Мѓtѓ‹ѓpѓX‚Й•ПЉ·‚·‚й
+; г‚«гѓ¬гѓігѓ€гѓ‡г‚Јгѓ¬г‚Їгѓ€гѓЄг‚’иЂѓж…®гЃ—гЃџжЊ‡е®љгЃ®гѓ‘г‚№г‚’гЂЃгѓ‰гѓ©г‚¤гѓ–гѓ«гѓјгѓ€гЃ‹г‚‰гЃ®гѓ•гѓ«гѓ‘г‚№гЃ«е¤‰жЏ›гЃ™г‚‹
 TW_GetFullPath(path) {
 	VarSetCapacity(dest,512,0x00)
 	dir:=A_WorkingDir
@@ -885,8 +885,8 @@ TW_GetFullPath(path) {
 	return dest
 }
 
-; hwnd‚ЕЋw’и‚µ‚ЅѓЉѓXѓgѓrѓ…Ѓ[“а‚МѓAѓCѓeѓЂ‚М‹йЊ`‚р“ѕ‚йЃB(ЏЪЌЧ•\Ћ¦‚Е‚МѓXѓNѓЌЃ[ѓ‹—КЋZЏo‚Е——p)
-; ‚З‚М‹йЊ`‚р“ѕ‚й‚©‚Н€И‰є‚©‚з‘I‘р
+; hwndгЃ§жЊ‡е®љгЃ—гЃџгѓЄг‚№гѓ€гѓ“гѓҐгѓје†…гЃ®г‚ўг‚¤гѓ†гѓ гЃ®зџ©еЅўг‚’еѕ—г‚‹гЂ‚(и©ізґ°иЎЁз¤єгЃ§гЃ®г‚№г‚Їгѓ­гѓјгѓ«й‡Џз®—е‡єгЃ§е€©з”Ё)
+; гЃ©гЃ®зџ©еЅўг‚’еѕ—г‚‹гЃ‹гЃЇд»Ґдё‹гЃ‹г‚‰йЃёжЉћ
 ;	 LVIR_BOUNDS   := 0x00,  LVIR_ICON        := 0x01
 ;	 LVIR_LABEL    := 0x02,  LVIR_SELECTBOUNDS:= 0x03
 TW_LVM_GETITEMRECT(hwnd, idx, ByRef x1, ByRef y1, ByRef x2, ByRef y2, type=0) {
