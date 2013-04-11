@@ -66,6 +66,18 @@ is_target_window_active() ;{{{
 	Return True
 } ;}}}
 
+is_cmd_prompt_active() ;{{{
+{
+	SetTitleMatchMode,3
+	IfWinActive,ahk_class ConsoleWindowClass
+	{
+		SetTitleMatchMode,RegEx
+		IfWinActive,Command Prompt|コマンド プロンプト|cmd\.exe
+			Return True
+	}
+	Return False
+} ;}}}
+
 update_icon() ;{{{
 {
 	local icon
@@ -278,6 +290,22 @@ select_all() ;{{{
 	clear_pre_x()
 } ;}}}
 
+cmd_yank() ;{{{
+{
+	Send !{Space}ep
+	clear_pre_spc()
+} ;}}}
+cmd_search_forward() ;{{{
+{
+	Send !{Space}ef!d!n
+	clear_pre_spc()
+} ;}}}
+cmd_search_backward() ;{{{
+{
+	Send !{Space}ef!u!n
+	clear_pre_spc()
+} ;}}}
+
 ; }}}
 
 ; Hook keys {{{
@@ -320,6 +348,31 @@ select_all() ;{{{
 ^/::	undo()
 ^@::	toggle_pre_spc()
 ^Space::	toggle_pre_spc()
+
+; toggle suspend
+^q::
+	Suspend
+	update_icon()
+	Return
+
+;}}}
+
+#If is_cmd_prompt_active() ;{{{
+
+^a::	move_beginning_of_line()
+^b::	backward_char()
+^d::	delete_char()
+^e::	move_end_of_line()
+^f::	forward_char()
+^h::	delete_backward_char()
+^m::	newline()
+^n::	next_line()
+^p::	previous_line()
+^r::	cmd_search_backward()
+^s::	cmd_search_forward()
+^v::	scroll_down()
+!v::	scroll_up()
+^y::	cmd_yank()
 
 ; toggle suspend
 ^q::
