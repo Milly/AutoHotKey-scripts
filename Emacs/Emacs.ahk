@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 07 Sep 2012.
+;   Last Changed: 11 Apr 2013
 ;=====================================================================
 
 #InstallKeybdHook
@@ -12,6 +12,8 @@
 icon_normal  := A_ScriptDir . "\Emacs-n.ico"
 icon_disable := A_ScriptDir . "\Emacs-d.ico"
 icon_pre_x   := A_ScriptDir . "\Emacs-x.ico"
+active_id      := 0
+last_active_id := 0
 
 ; Flag: C-x
 is_pre_x   := False
@@ -22,25 +24,50 @@ is_pre_spc := False
 ; }}}
 
 ; Initialize {{{
+
 update_icon()
+SetTimer, CheckActiveWindow, 500
+Return
+
+CheckActiveWindow:
+	check_active_window()
+	Return
+
 ; }}}
 
 ; Common functions {{{
 
-is_ignore_window() ;{{{
+check_active_window() ;{{{
 {
-	IfWinActive,ahk_class ConsoleWindowClass ; Cygwin
-		Return True
+	global
+	last_active_id := active_id
+	WinGet, active_id, Id, A
+	If (active_id != last_active_id)
+	{
+		is_pre_x   := False
+		is_pre_spc := False
+		update_icon()
+	}
+} ;}}}
+
+is_target_window_active() ;{{{
+{
+	SetTitleMatchMode,3
+	IfWinActive,ahk_class ConsoleWindowClass ; Command Prompt, Cygwin
+		Return False
 	IfWinActive,ahk_class Vim   ; GVim
-		Return True
+		Return False
 	IfWinActive,ahk_class PuTTY ; Putty
-		Return True
-	Return False
+		Return False
+	IfWinActive,ahk_class VNCMDI_Window ; VNC
+		Return False
+	IfWinActive,ahk_class TscShellContainerClass ; Remote Desktop
+		Return False
+	Return True
 } ;}}}
 
 update_icon() ;{{{
 {
-	global
 	local icon
 	If A_IsSuspended
 		icon := icon_disable
@@ -53,12 +80,14 @@ update_icon() ;{{{
 
 clear_pre_x() ;{{{
 {
-	global is_pre_x := False
+	global
+	is_pre_x := False
 	update_icon()
 } ;}}}
 toggle_pre_x() ;{{{
 {
-	global is_pre_x := ! is_pre_x
+	global
+	is_pre_x := ! is_pre_x
 	update_icon()
 } ;}}}
 if_pre_x(then_func, else_func = "") ;{{{
@@ -72,12 +101,21 @@ if_pre_x(then_func, else_func = "") ;{{{
 
 clear_pre_spc() ;{{{
 {
-	global is_pre_spc := False
+	global
+	is_pre_spc := False
 } ;}}}
 toggle_pre_spc() ;{{{
 {
-	global is_pre_spc := ! is_pre_spc
+	global
+	is_pre_spc := ! is_pre_spc
 } ;}}}
+
+confirm_exit() ;{{{
+{
+	MsgBox, 0x60124,, Exit Emacs.ahk ?
+	IfMsgBox, Yes
+		ExitApp
+}	;}}}
 
 ; }}}
 
@@ -244,7 +282,17 @@ select_all() ;{{{
 
 ; Hook keys {{{
 
-#If !is_ignore_window()
+; Global hook keys {{{
+
+; Exit
+#k::
+	Suspend,Permit
+	confirm_exit()
+	Return
+
+;}}}
+
+#If is_target_window_active() ;{{{
 
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
@@ -262,7 +310,7 @@ select_all() ;{{{
 ^o::	open_line()
 ^p::	if_pre_x("select_all", "previous_line")
 ^r::	isearch_backward()
-^s::	if_pre_x("save_buffer", "isearch_backward")
+^s::	if_pre_x("save_buffer", "isearch_forward")
 ^v::	scroll_down()
 !v::	scroll_up()
 ^w::	kill_region()
@@ -271,20 +319,14 @@ select_all() ;{{{
 ^y::	yank()
 ^/::	undo()
 ^@::	toggle_pre_spc()
-; $^{Space}::	toggle_pre_spc()
-; ^vk20sc039::	toggle_pre_spc()
+^Space::	toggle_pre_spc()
 
-; Toggle enabled
+; toggle suspend
 ^q::
 	Suspend
 	update_icon()
 	Return
 
-; Exit
-#k::
-	MsgBox, 4,, スクリプトを終了しますか?,
-	IfMsgBox, Yes
-		ExitApp
-	Return
+;}}}
 
 ; }}}
