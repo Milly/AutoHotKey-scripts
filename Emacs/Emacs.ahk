@@ -184,6 +184,9 @@ find_file() {
 save_buffer() {
 	Send, ^s
 }
+write_file() {
+	Send, !fa
+}
 kill_emacs() {
 	Send !{F4}
 }
@@ -325,6 +328,8 @@ cmd_search_backward() {
 			save_buffer()
 		Else If (in = "u")
 			undo()
+		Else If (in = "^w")
+			write_file()
 	}
 	in :=
 	Suspend,Off
