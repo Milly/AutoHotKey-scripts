@@ -1,12 +1,12 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 11 Apr 2013
+;   Last Changed: 26 Jul 2013
 ;=====================================================================
 
 #InstallKeybdHook
 #UseHook
 
-; Vars {{{
+; Vars {
 
 ; Icons
 icon_normal  := A_ScriptDir . "\Emacs-n.ico"
@@ -21,9 +21,9 @@ is_pre_x   := False
 ; Flag: C-Space
 is_pre_spc := False
 
-; }}}
+; }
 
-; Initialize {{{
+; Initialize {
 
 update_icon()
 SetTimer, CheckActiveWindow, 500
@@ -33,12 +33,11 @@ CheckActiveWindow:
 	check_active_window()
 	Return
 
-; }}}
+; }
 
-; Common functions {{{
+; Common functions {
 
-check_active_window() ;{{{
-{
+check_active_window() {
 	global
 	last_active_id := active_id
 	WinGet, active_id, Id, A
@@ -48,10 +47,9 @@ check_active_window() ;{{{
 		is_pre_spc := False
 		update_icon()
 	}
-} ;}}}
+}
 
-is_target_window_active() ;{{{
-{
+is_target_window_active() {
 	SetTitleMatchMode,3
 	IfWinActive,ahk_class ConsoleWindowClass ; Command Prompt, Cygwin
 		Return False
@@ -64,10 +62,9 @@ is_target_window_active() ;{{{
 	IfWinActive,ahk_class TscShellContainerClass ; Remote Desktop
 		Return False
 	Return True
-} ;}}}
+}
 
-is_cmd_prompt_active() ;{{{
-{
+is_cmd_prompt_active() {
 	SetTitleMatchMode,3
 	IfWinActive,ahk_class ConsoleWindowClass
 	{
@@ -76,10 +73,9 @@ is_cmd_prompt_active() ;{{{
 			Return True
 	}
 	Return False
-} ;}}}
+}
 
-update_icon() ;{{{
-{
+update_icon() {
 	local icon
 	If A_IsSuspended
 		icon := icon_disable
@@ -88,240 +84,207 @@ update_icon() ;{{{
 	Else
 		icon := icon_normal
 	Menu, Tray, icon, %icon%,, 1
-} ;}}}
+}
 
-clear_pre_x() ;{{{
-{
+clear_pre_x() {
 	global
 	is_pre_x := False
 	update_icon()
-} ;}}}
-toggle_pre_x() ;{{{
-{
+}
+toggle_pre_x() {
 	global
 	is_pre_x := ! is_pre_x
 	update_icon()
-} ;}}}
-if_pre_x(then_func, else_func = "") ;{{{
-{
+}
+if_pre_x(then_func, else_func = "") {
 	global is_pre_x
 	If is_pre_x
 		%then_func%()
 	Else If IsFunc(else_func)
 		%else_func%()
-} ;}}}
+}
 
-clear_pre_spc() ;{{{
-{
+clear_pre_spc() {
 	global
 	is_pre_spc := False
-} ;}}}
-toggle_pre_spc() ;{{{
-{
+}
+toggle_pre_spc() {
 	global
 	is_pre_spc := ! is_pre_spc
-} ;}}}
+}
 
-confirm_exit() ;{{{
-{
+confirm_exit() {
 	MsgBox, 0x60124,, Exit Emacs.ahk ?
 	IfMsgBox, Yes
 		ExitApp
-}	;}}}
+}
 
-; }}}
+; }
 
-; Send key functions {{{
+; Send key functions {
 
-delete_char() ;{{{
-{
+delete_char() {
 	Send {Del}
 	clear_pre_spc()
-} ;}}}
-delete_backward_char() ;{{{
-{
+}
+delete_backward_char() {
 	Send {BS}
 	clear_pre_spc()
-} ;}}}
-kill_line() ;{{{
-{
+}
+kill_line() {
 	Send {ShiftDown}{END}{SHIFTUP}
 	Sleep 10 ;[ms]
 	Send ^x
 	clear_pre_spc()
-} ;}}}
-open_line() ;{{{
-{
+}
+open_line() {
 	Send {END}{Enter}{Up}
 	clear_pre_spc()
-} ;}}}
-quit() ;{{{
-{
+}
+quit() {
 	Send {ESC}
 	clear_pre_spc()
-} ;}}}
-newline() ;{{{
-{
+}
+newline() {
 	Send {Enter}
 	clear_pre_spc()
-} ;}}}
-indent_for_tab_command() ;{{{
-{
+}
+indent_for_tab_command() {
 	Send {Tab}
 	clear_pre_spc()
-} ;}}}
-newline_and_indent() ;{{{
-{
+}
+newline_and_indent() {
 	Send {Enter}{Tab}
 	clear_pre_spc()
-} ;}}}
-isearch_forward() ;{{{
-{
+}
+isearch_forward() {
 	Send ^f
 	clear_pre_spc()
-} ;}}}
-isearch_backward() ;{{{
-{
+}
+isearch_backward() {
 	Send ^f
 	clear_pre_spc()
-} ;}}}
-kill_region() ;{{{
-{
+}
+kill_region() {
 	Send ^x
 	clear_pre_spc()
-} ;}}}
-kill_ring_save() ;{{{
-{
+}
+kill_ring_save() {
 	Send ^c
 	clear_pre_spc()
-} ;}}}
-yank() ;{{{
-{
+}
+yank() {
 	Send ^v
 	clear_pre_spc()
-} ;}}}
-undo() ;{{{
-{
+}
+undo() {
 	Send ^z
 	clear_pre_spc()
-} ;}}}
-find_file() ;{{{
-{
+}
+find_file() {
 	Send ^o
 	clear_pre_x()
-} ;}}}
-save_buffer() ;{{{
-{
+}
+save_buffer() {
 	Send, ^s
 	clear_pre_x()
-} ;}}}
-kill_emacs() ;{{{
-{
+}
+kill_emacs() {
 	Send !{F4}
 	clear_pre_x()
-} ;}}}
-move_beginning_of_line() ;{{{
-{
+}
+move_beginning_of_line() {
 	global
 	If is_pre_spc
 		Send +{HOME}
 	Else
 		Send {HOME}
-} ;}}}
-move_end_of_line() ;{{{
-{
+}
+move_end_of_line() {
 	global
 	If is_pre_spc
 		Send +{END}
 	Else
 		Send {END}
-} ;}}}
-previous_line() ;{{{
-{
+}
+previous_line() {
 	global
 	If is_pre_spc
 		Send +{Up}
 	Else
 		Send {Up}
-} ;}}}
-next_line() ;{{{
-{
+}
+next_line() {
 	global
 	If is_pre_spc
 		Send +{Down}
 	Else
 		Send {Down}
-} ;}}}
-forward_char() ;{{{
-{
+}
+forward_char() {
 	global
 	If is_pre_spc
 		Send +{Right}
 	Else
 		Send {Right}
-} ;}}}
-backward_char() ;{{{
-{
+}
+backward_char() {
 	global
 	If is_pre_spc
 		Send +{Left}
 	Else
 		Send {Left}
-} ;}}}
-scroll_up() ;{{{
-{
+}
+scroll_up() {
 	global
 	If is_pre_spc
 		Send +{PgUp}
 	Else
 		Send {PgUp}
-} ;}}}
-scroll_down() ;{{{
-{
+}
+scroll_down() {
 	global
 	If is_pre_spc
 		Send +{PgDn}
 	Else
 		Send {PgDn}
-} ;}}}
-select_all() ;{{{
-{
+}
+select_all() {
 	Send ^a
 	clear_pre_x()
-} ;}}}
+}
 
-cmd_yank() ;{{{
-{
+cmd_yank() {
 	Send !{Space}ep
 	clear_pre_spc()
-} ;}}}
-cmd_search_forward() ;{{{
-{
+}
+cmd_search_forward() {
 	Send !{Space}ef!d!n
 	clear_pre_spc()
-} ;}}}
-cmd_search_backward() ;{{{
-{
+}
+cmd_search_backward() {
 	Send !{Space}ef!u!n
 	clear_pre_spc()
-} ;}}}
+}
 
-; }}}
+; }
 
-; Hook keys {{{
+; Hook keys {
 
-; Global hook keys {{{
+; Global hook keys {
 
-; Exit
+; Exit {
 #k::
 	Suspend,Permit
 	confirm_exit()
 	Return
+;}
 
-;}}}
+;}
 
-#If is_target_window_active() ;{{{
+#If is_target_window_active() ;{
 
+; single commands {
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
 ^c::	if_pre_x("kill_emacs")
@@ -348,17 +311,20 @@ cmd_search_backward() ;{{{
 ^/::	undo()
 ^@::	toggle_pre_spc()
 ^Space::	toggle_pre_spc()
+;}
 
-; toggle suspend
+; toggle suspend {
 ^q::
 	Suspend
 	update_icon()
 	Return
+;}
 
-;}}}
+;}
 
-#If is_cmd_prompt_active() ;{{{
+#If is_cmd_prompt_active() ;{
 
+; single commands {
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
 ^d::	delete_char()
@@ -373,13 +339,16 @@ cmd_search_backward() ;{{{
 ^v::	scroll_down()
 !v::	scroll_up()
 ^y::	cmd_yank()
+;}
 
-; toggle suspend
+; toggle suspend {
 ^q::
 	Suspend
 	update_icon()
 	Return
+;}
 
-;}}}
+;}
 
-; }}}
+; }
+; vim: set ts=4 sw=4 noet fdm=marker fmr={,}:
