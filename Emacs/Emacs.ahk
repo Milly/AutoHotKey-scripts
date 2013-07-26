@@ -326,6 +326,12 @@ cmd_search_backward() {
 	Return
 ;}
 
+; send original key {
+^+g::	Send ^g
+^+q::	Send ^q
+^+w::	Send ^w
+;}
+
 ; toggle suspend {
 ^q::
 	Suspend
