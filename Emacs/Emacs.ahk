@@ -174,6 +174,10 @@ undo() {
 	Send ^z
 	clear_pre_spc()
 }
+redo() {
+	Send ^y
+	clear_pre_spc()
+}
 find_file() {
 	Send ^o
 }
@@ -296,7 +300,9 @@ cmd_search_backward() {
 !w::	kill_ring_save()
 ^y::	yank()
 ^/::	undo()
+^?::	redo()
 ^@::	toggle_pre_spc()
+^_::	undo()
 ^Space::	toggle_pre_spc()
 ;}
 
