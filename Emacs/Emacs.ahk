@@ -77,10 +77,10 @@ is_cmd_prompt_active() {
 
 update_icon() {
 	local icon
-	If A_IsSuspended
-		icon := icon_disable
-	Else If is_pre_x
+	If is_pre_x
 		icon := icon_pre_x
+	Else If A_IsSuspended
+		icon := icon_disable
 	Else
 		icon := icon_normal
 	Menu, Tray, icon, %icon%,, 1
@@ -95,13 +95,6 @@ toggle_pre_x() {
 	global
 	is_pre_x := ! is_pre_x
 	update_icon()
-}
-if_pre_x(then_func, else_func = "") {
-	global is_pre_x
-	If is_pre_x
-		%then_func%()
-	Else If IsFunc(else_func)
-		%else_func%()
 }
 
 clear_pre_spc() {
@@ -183,15 +176,12 @@ undo() {
 }
 find_file() {
 	Send ^o
-	clear_pre_x()
 }
 save_buffer() {
 	Send, ^s
-	clear_pre_x()
 }
 kill_emacs() {
 	Send !{F4}
-	clear_pre_x()
 }
 move_beginning_of_line() {
 	global
@@ -251,7 +241,6 @@ scroll_down() {
 }
 select_all() {
 	Send ^a
-	clear_pre_x()
 }
 
 cmd_yank() {
@@ -287,10 +276,9 @@ cmd_search_backward() {
 ; single commands {
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
-^c::	if_pre_x("kill_emacs")
 ^d::	delete_char()
 ^e::	move_end_of_line()
-^f::	if_pre_x("find_file", "forward_char")
+^f::	forward_char()
 ^g::	quit()
 ^h::	delete_backward_char()
 ^i::	indent_for_tab_command()
@@ -299,18 +287,43 @@ cmd_search_backward() {
 ^m::	newline()
 ^n::	next_line()
 ^o::	open_line()
-^p::	if_pre_x("select_all", "previous_line")
+^p::	previous_line()
 ^r::	isearch_backward()
-^s::	if_pre_x("save_buffer", "isearch_forward")
+^s::	isearch_forward()
 ^v::	scroll_down()
 !v::	scroll_up()
 ^w::	kill_region()
 !w::	kill_ring_save()
-^x::	toggle_pre_x()
 ^y::	yank()
 ^/::	undo()
 ^@::	toggle_pre_spc()
 ^Space::	toggle_pre_spc()
+;}
+
+; Ctrl-x combination commands {
+^x::
+	Suspend,On
+	toggle_pre_x()
+	Input in, B I M L1 T3, {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}
+	If ErrorLevel <> Timeout
+	{
+		If (Asc(in) <= 26) ; Ctrl+[a-z]
+			in := "^" . Chr(Asc(in) + 0x60)
+		If (in = "^c")
+			kill_emacs()
+		Else If (in = "^f")
+			find_file()
+		Else If (in = "^p")
+			select_all()
+		Else If (in = "^s")
+			save_buffer()
+		Else If (in = "u")
+			undo()
+	}
+	in :=
+	Suspend,Off
+	toggle_pre_x()
+	Return
 ;}
 
 ; toggle suspend {
@@ -351,4 +364,4 @@ cmd_search_backward() {
 ;}
 
 ; }
-; vim: set ts=4 sw=4 noet fdm=marker fmr={,}:
+; vim: set ts=4 sw=4 noet fdm=marker fmr={,} fml=2:
