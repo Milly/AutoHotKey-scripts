@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 26 Jul 2013
+;   Last Changed: 29 Jul 2013
 ;=====================================================================
 
 #InstallKeybdHook
@@ -190,6 +190,9 @@ write_file() {
 kill_emacs() {
 	Send !{F4}
 }
+kill_buffer() {
+	Send ^w
+}
 move_beginning_of_line() {
 	global
 	If is_pre_spc
@@ -322,6 +325,8 @@ cmd_search_backward() {
 			kill_emacs()
 		Else If (in = "^f")
 			find_file()
+		Else If (in = "k")
+			kill_buffer()
 		Else If (in = "^p")
 			select_all()
 		Else If (in = "^s")
@@ -338,9 +343,8 @@ cmd_search_backward() {
 ;}
 
 ; send original key {
-^+g::	Send ^g
-^+q::	Send ^q
-^+w::	Send ^w
+^!g::	Send ^g
+^!q::	Send ^q
 ;}
 
 ; toggle suspend {
