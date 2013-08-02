@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 29 Jul 2013
+;   Last Changed: 02 Aug 2013
 ;=====================================================================
 
 #InstallKeybdHook
@@ -56,6 +56,10 @@ is_target_window_active() {
 	IfWinActive,ahk_class Vim   ; GVim
 		Return False
 	IfWinActive,ahk_class PuTTY ; Putty
+		Return False
+	IfWinActive,ahk_class mintty ; mintty
+		Return False
+	IfWinActive,ahk_class VirtualConsoleClass ; ConEmu
 		Return False
 	IfWinActive,ahk_class VNCMDI_Window ; VNC
 		Return False
