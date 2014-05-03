@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 02 Aug 2013
+;   Last Changed: 17 Sep 2013
 ;=====================================================================
 
 #InstallKeybdHook
@@ -64,6 +64,9 @@ is_target_window_active() {
 	IfWinActive,ahk_class VNCMDI_Window ; VNC
 		Return False
 	IfWinActive,ahk_class TscShellContainerClass ; Remote Desktop
+		Return False
+	SetTitleMatchMode,RegEx
+	IfWinActive,ahk_class cygwin/x ; Cygwin X
 		Return False
 	Return True
 }
