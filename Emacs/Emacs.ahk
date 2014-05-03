@@ -280,7 +280,7 @@ cmd_search_backward() {
 ; Global hook keys {
 
 ; Exit {
-#k::
+#^k::
 	Suspend,Permit
 	confirm_exit()
 	Return
