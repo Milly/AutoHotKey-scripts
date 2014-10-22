@@ -8,7 +8,13 @@ TW_Init:
 	If (A_LineFile == A_ScriptFullPath)
 		Menu, Tray, Tip, TrackWheel
 	TW_Initialize("TW.ini", true)
+    OnExit, TW_Exit
 	return
+
+TW_Exit:
+    TW_UnhookMouse(TW_hHook)
+    ExitApp
+    return
 
 ;=====================================================================
 ; ユーザ定義サブルーチン関連
