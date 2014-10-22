@@ -110,7 +110,7 @@ TW_MouseLL(nCode, wParam, lParam) {
 			return 1 ; 破棄
 		}
 	}
-	return DllCall("user32.dll\CallNextHookEx", "UInt",0, "Int",nCode, "UInt",wParam, "UInt",lParam)
+	return DllCall("user32.dll\CallNextHookEx", "Ptr",0, "Int",nCode, "UInt",wParam, "UInt",lParam)
 }
 
 ;=====================================================================
@@ -513,7 +513,7 @@ TW_BypassCheck(ByRef hCtrl, ByRef hWindow, ByRef cCtrl, ByRef cWindow) {
 		WinGetClass, cCtrl, ahk_id %hCtrl%
 		if (!(TW__Bypass && RegExMatch(cCtrl, TW__Bypass)))
 			break
-		hParent := DllCall("GetParent", "UInt",hCtrl)
+		hParent := DllCall("GetParent", "Ptr",hCtrl)
 		if (hParent == 0 || hParent == hWindow)
 			break
 		hCtrl := hParent
@@ -602,7 +602,7 @@ TW_MdiActivate(hwnd, ctrl) {
 			SendMessage, 0x222, target, 0 ; WM_MDIACTIVATE
 			return ErrorLevel
 		}
-		target := DllCall("GetParent", "UInt",target)
+		target := DllCall("GetParent", "Ptr",target)
 	}
 }
 
@@ -620,10 +620,11 @@ TW_Initialize(file="TW.ini", trayIcon=false) {
 	msg := DllCall("RegisterWindowMessage", "Str","TrackWheelCallbackMsg")
 	hHookProc := RegisterCallback("TW_MouseLL", "", 3, msg) ; 第3引数はフックプロシージャのA_EventInfoで取り出せる
 	TW_hHook:= DllCall("SetWindowsHookEx"
-		, "Int",  0x0E                                  ; Mouse_LL
-		, "UInt", hHookProc                             ; 
-		, "UInt", DllCall("GetModuleHandle", "UInt",0)  ; 
-		, "UInt", 0)                                    ; 0:Global
+		, "Int", WH_MOUSE_LL := 0x0E
+		, "Ptr", hHookProc
+		, "Ptr", DllCall("GetModuleHandle", "UInt", 0, "Ptr")
+		, "UInt", 0 ; 0:Global
+        , "Ptr")
 	OnMessage(msg, "TW_MsgListener", 1)
 	; 変数初期化
 	dir := A_WorkingDir
@@ -639,7 +640,7 @@ TW_Initialize(file="TW.ini", trayIcon=false) {
 }
 
 TW_UnhookMouse(hHook) {
-	return DllCall("UnhookWindowsHookEx", "UInt",hHook)
+	return DllCall("UnhookWindowsHookEx", "Ptr",hHook)
 }
 
 
@@ -808,7 +809,7 @@ TW_FindScrollBar(sX, sY, ctrl) {
 							|| ((vY!=y)&&((y<sY)&&(vY<y))||((vY>sY)&&(vY>y)))   ;上下分割
 							|| ((vX!=x)&&((x>sX)&&(vX>x))||((vX<sX)&&(vX<x)))   ;左右分割
 						vX:=x,vY:=y,vW:=w,vH:=h ;,VShwnd:=sbHwnd
-						,TW_SCROLLBAR_V_Set(SB_CTL, sbHwnd, DllCall("GetParent", "UInt", sbHwnd)), retValue |= 2
+						,TW_SCROLLBAR_V_Set(SB_CTL, sbHwnd, DllCall("GetParent", "Ptr", sbHwnd, "Ptr")), retValue |= 2
 				} else {
 					if ((y+h) < sY || (cX+cW)<x) ; PowerPointノート欄/左ペイン除外用
 						continue
@@ -816,7 +817,7 @@ TW_FindScrollBar(sX, sY, ctrl) {
 							|| ((hX!=x)&&((x<sX)&&(hX<x))||((hX>sX)&&(hX>x)))      ;左右(Excel型)
 							|| ((hY!=y)&&((y+h>sY)&&(hY>y))||((hY+hH<sY)&&(hY<y))) ;上下(Word型)
 						hX:=x,hY:=y,hW:=w,hH:=h ;, HShwnd:=sbHwnd
-						,TW_SCROLLBAR_H_Set(SB_CTL, sbHwnd, DllCall("GetParent", "UInt", sbHwnd)), retValue |= 1
+						,TW_SCROLLBAR_H_Set(SB_CTL, sbHwnd, DllCall("GetParent", "Ptr", sbHwnd, "Ptr")), retValue |= 1
 				}
 			} else if (InStr(A_LoopField, "CScrollBar")==1) { ; ほぼ Access2002用、かなり手抜き
 				if (style & WS_HSCROLL) && !(retValue & 0x1) ; 最初に見つかった横要素
@@ -831,7 +832,7 @@ TW_FindScrollBar(sX, sY, ctrl) {
 		}
 		if (retValue)
 			break
-		target := DllCall("GetParent", "UInt",target, "UInt")
+		target := DllCall("GetParent", "Ptr",target, "Ptr")
 		if (target == 0)
 			break
 	}
@@ -855,7 +856,7 @@ TW_GetScrollInfoAll(hwnd, type, ByRef nMin=0, ByRef nMax=0, ByRef nPage=0, ByRef
 	size:=VarSetCapacity(SCROLLINFO, 28, 0x00)
 	NumPut(28,   SCROLLINFO, 0, "Int")
 	,NumPut(0x17, SCROLLINFO, 4, "Int") ; SIF_RANGE(0x01) or SIF_PAGE(0x02) or SIF_POS(0x04) or SIF_TRACKPOS(0x10) = 0x17
-	if (!DllCall("user32.dll\GetScrollInfo", "UInt",hwnd, "Int",type, "Int",&SCROLLINFO, "Int"))
+	if (!DllCall("user32.dll\GetScrollInfo", "Ptr",hwnd, "Int",type, "Int",&SCROLLINFO, "Int"))
 		return false
 	nMin := NumGet(SCROLLINFO, 8, "Int"), nMax := NumGet(SCROLLINFO, 12, "Int")
 	, nPage := NumGet(SCROLLINFO, 16, "Int"), nPos := NumGet(SCROLLINFO, 20, "Int")
@@ -873,7 +874,7 @@ TW_SetScrollInfoAll(hwnd, type, nMin, nMax,nPage,nPos,nTrackPos) {
 	,NumPut(nPage,    SCROLLINFO, 16, "Int")
 	,NumPut(nPos,     SCROLLINFO, 20, "Int")
 	,NumPut(nTrackPos SCROLLINFO, 24, "Int")
-	return DllCall("user32.dll\SetScrollInfo", "UInt",hwnd, "Int",type, "UInt",&SCROLLINFO, "Int",true)
+	return DllCall("user32.dll\SetScrollInfo", "Ptr",hwnd, "Int",type, "UInt",&SCROLLINFO, "Int",true)
 }
 
 SendMessage(hwnd, msg, wParam, lParam) {
@@ -898,13 +899,13 @@ TW_GetFullPath(path) {
 TW_LVM_GETITEMRECT(hwnd, idx, ByRef x1, ByRef y1, ByRef x2, ByRef y2, type=0) {
 	size:=VarSetCapacity(rect, 16, 0), NumPut(type, rect, 0, "Int")
 	WinGet, pid, PID, ahk_id %hwnd%
-	If (hProcess:=DllCall("OpenProcess", "UInt",0x38, "Int", false, "UInt",pid)) ; PROCESS_VM_OPERATION(0x08)| PROCESS_VM_READ(0x10) | PROCESS_VM_WRITE(0x20)
-		If (remote_buffer:=DllCall("VirtualAllocEx", "UInt",hProcess, "UInt",0, "UInt",0x1000, "UInt",0x1000, "UInt",0x4)) ; MEM_COMMIT / PAGE_READWRITE
-			If DllCall("WriteProcessMemory", "UInt",hProcess, "UInt",remote_buffer, "UInt",&rect, "UInt",size, "UInt",0)
+	If (hProcess:=DllCall("OpenProcess", "UInt",0x38, "Int", false, "UInt",pid, "Ptr")) ; PROCESS_VM_OPERATION(0x08)| PROCESS_VM_READ(0x10) | PROCESS_VM_WRITE(0x20)
+		If (remote_buffer:=DllCall("VirtualAllocEx", "Ptr",hProcess, "UInt",0, "UInt",0x1000, "UInt",0x1000, "UInt",0x4, "Ptr")) ; MEM_COMMIT / PAGE_READWRITE
+			If DllCall("WriteProcessMemory", "Ptr",hProcess, "Ptr",remote_buffer, "Ptr",&rect, "UInt",size, "Ptr",0)
 				If SendMessage(hwnd, 0x100e, idx, remote_buffer) ; LVM_GETITEMRECT
-					If DllCall("ReadProcessMemory", "UInt",hProcess, "UInt",remote_buffer, "UInt",&rect, "UInt",size, "UInt",0)
+					If DllCall("ReadProcessMemory", "Ptr",hProcess, "Ptr",remote_buffer, "Ptr",&rect, "UInt",size, "Ptr",0)
 						x1:=NumGet(rect, 0, "Int"), y1:=NumGet(rect, 4, "Int"), x2:=NumGet(rect, 8, "Int"), y2:=NumGet(rect,12, "Int"), ret:=true
-			DllCall("VirtualFreeEx", "UInt",hProcess, "UInt",remote_buffer, "UInt",0, "UInt",0x8000)
-		DllCall("CloseHandle", "UInt",hProcess)
+			DllCall("VirtualFreeEx", "Ptr",hProcess, "Ptr",remote_buffer, "UInt",0, "UInt",0x8000)
+		DllCall("CloseHandle", "Ptr",hProcess)
 	return ret
 }
