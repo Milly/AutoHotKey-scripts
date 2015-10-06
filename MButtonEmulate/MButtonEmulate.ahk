@@ -3,10 +3,13 @@
 #UseHook
 
 ^RButton::
-    Click, Middle, Down
+    while GetKeyState("Ctrl", "P") {
+        Sleep, 10
+    }
+    Send, {Click Middle Down}
     while GetKeyState("RButton", "P")
     {
-        continue
+        Sleep, 10
     }
-    Click, Middle, Up
+    Send, {Click Middle Up}
     return
