@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 17 Sep 2013
+;   Last Changed: 14 Sep 2015
 ;=====================================================================
 
 #InstallKeybdHook
@@ -72,11 +72,11 @@ is_target_window_active() {
 }
 
 is_cmd_prompt_active() {
-	SetTitleMatchMode,3
 	IfWinActive,ahk_class ConsoleWindowClass
 	{
-		SetTitleMatchMode,RegEx
-		IfWinActive,Command Prompt|コマンド プロンプト|cmd\.exe
+		IfWinActive,ahk_exe cmd.exe
+			Return True
+		IfWinActive,ahk_exe powershell.exe
 			Return True
 	}
 	Return False
