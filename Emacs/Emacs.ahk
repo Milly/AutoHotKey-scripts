@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 14 Sep 2015
+;   Last Changed: 22 Oct 2014
 ;=====================================================================
 
 #InstallKeybdHook
@@ -259,6 +259,12 @@ scroll_down() {
 select_all() {
 	Send ^a
 }
+move_window_position() {
+	Send !{Space}m
+}
+change_window_size() {
+	Send !{Space}s
+}
 
 cmd_yank() {
 	Send !{Space}ep
@@ -340,6 +346,8 @@ cmd_search_backward() {
 			save_buffer()
 		Else If (in = "u")
 			undo()
+		Else If (in = "w")
+			change_window_size()
 		Else If (in = "^w")
 			write_file()
 	}
