@@ -1,10 +1,11 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 22 Oct 2014
+;   Last Changed: 09 Jun 2016
 ;=====================================================================
 
 #InstallKeybdHook
 #UseHook
+StringCaseSense, On
 
 ; Vars {
 
@@ -50,25 +51,26 @@ check_active_window() {
 }
 
 is_target_window_active() {
-	SetTitleMatchMode,3
-	IfWinActive,ahk_class ConsoleWindowClass ; Command Prompt, Cygwin
-		Return False
-	IfWinActive,ahk_class Vim   ; GVim
-		Return False
-	IfWinActive,ahk_class PuTTY ; Putty
-		Return False
-	IfWinActive,ahk_class mintty ; mintty
-		Return False
-	IfWinActive,ahk_class VirtualConsoleClass ; ConEmu
-		Return False
-	IfWinActive,ahk_class VNCMDI_Window ; VNC
-		Return False
-	IfWinActive,ahk_class TscShellContainerClass ; Remote Desktop
-		Return False
-	SetTitleMatchMode,RegEx
-	IfWinActive,ahk_class cygwin/x ; Cygwin X
-		Return False
-	Return True
+	; ConsoleWindowClass        = Command Prompt, Cygwin
+	; TMobaXtermForm            = MobaXTerm
+	; Vim                       = GVim
+	; PuTTY                     = Putty
+	; mintty                    = mintty
+	; VirtualConsoleClass       = ConEmu
+	; VNCMDI_Window             = VNC
+	; TscShellContainerClass    = Remote Desktop
+	; cygwin/x                  = Cygwin X
+	local win_class, target_active := True
+	WinGetClass, win_class, A
+	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
+	{
+		target_active := False
+	}
+	else if win_class contains cygwin/x
+	{
+		target_active := False
+	}
+	Return target_active
 }
 
 is_cmd_prompt_active() {
