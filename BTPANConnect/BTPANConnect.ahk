@@ -31,13 +31,14 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
     DllCall("GetCursorPos", "Int64*", pt)
     nID := DllCall("TrackPopupMenuEx", "Ptr", hMenu, "UInt", 0x0100|0x0001, "Int", pt << 32 >> 32, "Int", pt >> 32, "Ptr", A_ScriptHwnd, "UInt", 0)
   } else {
+    MF_BYPOSITION := 0x0400
+    nMaxLen := 100
+    VarSetCapacity(sLabel, nMaxLen*2, 0)
     nID := 0
     itemCount := DllCall("GetMenuItemCount", "Ptr", hMenu)
     loop %itemCount% {
       nPos := A_Index-1
-      nLen := DllCall("GetMenuString", "Ptr", hMenu, "UInt", nPos, "Ptr", 0, "Int", 0, "UInt", 0x0400)  ;MF_BYPOSITION
-      VarSetCapacity(sLabel, nLen*2+2, 0)
-      DllCall("GetMenuString", "Ptr", hMenu, "UInt", nPos, "Str", sLabel, "Int", nLen+1, "UInt", 0x0400)
+      DllCall("GetMenuString", "Ptr", hMenu, "UInt", nPos, "Str", sLabel, "Int", nMaxLen, "UInt", MF_BYPOSITION)
       if (sLabel == targetLabel) {
         hSubMenu := DllCall("GetSubMenu", "Ptr", hMenu, "UInt", nPos, "Ptr")
         if (hSubMenu != 0) {
@@ -99,10 +100,11 @@ InvokeMenuCommand(pIContextMenu, nID)
   } CMINVOKECOMMANDINFOEX, *LPCMINVOKECOMMANDINFOEX;
   ; http://msdn.microsoft.com/en-us/library/bb773217%28v=VS.85%29.aspx
   */
+  CMIC_MASK_UNICODE := 0x4000
   struct_size := 24+10*A_PtrSize
   VarSetCapacity(pici, struct_size, 0)
   NumPut(struct_size, pici, 0, "UInt")        ;cbSize
-  NumPut(0x4000, pici, 4, "UInt")             ;fMask CMIC_MASK_UNICODE
+  NumPut(CMIC_MASK_UNICODE, pici, 4, "UInt")  ;fMask
   NumPut(A_ScriptHwnd, pici, 8, "UPtr")       ;hwnd
   NumPut(1, pici, 8+4*A_PtrSize, "UInt")      ;nShow
   NumPut(nID-3, pici, 8+1*A_PtrSize, "UPtr")  ;lpVerb
