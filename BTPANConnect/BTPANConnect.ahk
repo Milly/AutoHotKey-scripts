@@ -51,37 +51,7 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
   }
 
   if (nID != 0) {
-    /*
-    typedef struct _CMINVOKECOMMANDINFOEX {
-      DWORD   cbSize;         0
-      DWORD   fMask;          4
-      HWND    hwnd;           8
-      LPCSTR  lpVerb;         8+1*A_PtrSize
-      LPCSTR  lpParameters;   8+2*A_PtrSize
-      LPCSTR  lpDirectory;    8+3*A_PtrSize
-      int     nShow;          8+4*A_PtrSize
-      DWORD   dwHotKey;       12+4*A_PtrSize
-      HANDLE  hIcon;          16+4*A_PtrSize
-      LPCSTR  lpTitle;        16+5*A_PtrSize
-      LPCWSTR lpVerbW;        16+6*A_PtrSize
-      LPCWSTR lpParametersW;  16+7*A_PtrSize
-      LPCWSTR lpDirectoryW;   16+8*A_PtrSize
-      LPCWSTR lpTitleW;       16+9*A_PtrSize
-      POINT   ptInvoke;       16+10*A_PtrSize
-    } CMINVOKECOMMANDINFOEX, *LPCMINVOKECOMMANDINFOEX;
-    ; http://msdn.microsoft.com/en-us/library/bb773217%28v=VS.85%29.aspx
-    */
-    struct_size := 24+10*A_PtrSize
-    VarSetCapacity(pici, struct_size, 0)
-    NumPut(struct_size, pici, 0, "UInt")        ;cbSize
-    NumPut(0x4000, pici, 4, "UInt")             ;fMask CMIC_MASK_UNICODE
-    NumPut(A_ScriptHwnd, pici, 8, "UPtr")       ;hwnd
-    NumPut(1, pici, 8+4*A_PtrSize, "UInt")      ;nShow
-    NumPut(nID-3, pici, 8+1*A_PtrSize, "UPtr")  ;lpVerb
-    NumPut(nID-3, pici, 16+6*A_PtrSize, "UPtr") ;lpVerbW
-
-    ;IContextMenu->InvokeCommand
-    DllCall(VTable(pIContextMenu, 4), "Ptr", pIContextMenu, "Ptr", &pici)
+    InvokeMenuCommand(pIContextMenu, nID)
   }
 
   DllCall("DestroyMenu", "Ptr", hMenu)
@@ -105,6 +75,41 @@ GetContextMenuObject(sPath)
   CoTaskMemFree(pidl)
   DllCall("FreeLibrary", "UInt", hModule)
   return pIContextMenu
+}
+
+InvokeMenuCommand(pIContextMenu, nID)
+{
+  /*
+  typedef struct _CMINVOKECOMMANDINFOEX {
+    DWORD   cbSize;         0
+    DWORD   fMask;          4
+    HWND    hwnd;           8
+    LPCSTR  lpVerb;         8+1*A_PtrSize
+    LPCSTR  lpParameters;   8+2*A_PtrSize
+    LPCSTR  lpDirectory;    8+3*A_PtrSize
+    int     nShow;          8+4*A_PtrSize
+    DWORD   dwHotKey;       12+4*A_PtrSize
+    HANDLE  hIcon;          16+4*A_PtrSize
+    LPCSTR  lpTitle;        16+5*A_PtrSize
+    LPCWSTR lpVerbW;        16+6*A_PtrSize
+    LPCWSTR lpParametersW;  16+7*A_PtrSize
+    LPCWSTR lpDirectoryW;   16+8*A_PtrSize
+    LPCWSTR lpTitleW;       16+9*A_PtrSize
+    POINT   ptInvoke;       16+10*A_PtrSize
+  } CMINVOKECOMMANDINFOEX, *LPCMINVOKECOMMANDINFOEX;
+  ; http://msdn.microsoft.com/en-us/library/bb773217%28v=VS.85%29.aspx
+  */
+  struct_size := 24+10*A_PtrSize
+  VarSetCapacity(pici, struct_size, 0)
+  NumPut(struct_size, pici, 0, "UInt")        ;cbSize
+  NumPut(0x4000, pici, 4, "UInt")             ;fMask CMIC_MASK_UNICODE
+  NumPut(A_ScriptHwnd, pici, 8, "UPtr")       ;hwnd
+  NumPut(1, pici, 8+4*A_PtrSize, "UInt")      ;nShow
+  NumPut(nID-3, pici, 8+1*A_PtrSize, "UPtr")  ;lpVerb
+  NumPut(nID-3, pici, 16+6*A_PtrSize, "UPtr") ;lpVerbW
+
+  ;IContextMenu->InvokeCommand
+  DllCall(VTable(pIContextMenu, 4), "Ptr", pIContextMenu, "Ptr", &pici)
 }
 
 VTable(ppv, idx)
@@ -169,4 +174,4 @@ BTPAN__toggleConnection()
 
 #z:: BTPAN__toggleConnection()
 
-; vim: set ts=2 sw=2 noet fdm=marker fmr={{{,}}} :
+; vim: set ts=2 sw=2 et fdm=marker fmr={{{,}}} :
