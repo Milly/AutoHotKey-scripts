@@ -27,10 +27,6 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
   ;IContextMenu->QueryContextMenu
   DllCall(VTable(pIContextMenu, 3), "Ptr", pIContextMenu, "Ptr", hMenu, "UInt", 0, "UInt", 3, "UInt", 0x7FFF, "UInt", 0)
 
-  global pIContextMenu2 := ComObjQuery(pIContextMenu, IID_IContextMenu2:="{000214F4-0000-0000-C000-000000000046}")
-  global pIContextMenu3 := ComObjQuery(pIContextMenu, IID_IContextMenu3:="{BCFCE0A0-EC17-11D0-8D10-00A0C90F2719}")
-  global oldWindowProc := DllCall("SetWindowLong", "Ptr", A_ScriptHwnd, "Int", GWL_WNDPROC:=-4, "UInt", RegisterCallback("MenuWindowProc"))
-
   if (targetLabel == "") {
     DllCall("GetCursorPos", "Int64*", pt)
     nID := DllCall("TrackPopupMenuEx", "Ptr", hMenu, "UInt", 0x0100|0x0001, "Int", pt << 32 >> 32, "Int", pt >> 32, "Ptr", A_ScriptHwnd, "UInt", 0)
@@ -88,15 +84,8 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
     DllCall(VTable(pIContextMenu, 4), "Ptr", pIContextMenu, "Ptr", &pici)
   }
 
-  DllCall("GlobalFree", "UInt", DllCall("SetWindowLong", "Ptr", A_ScriptHwnd, "Int", GWL_WNDPROC, "UInt", oldWindowProc))
   DllCall("DestroyMenu", "Ptr", hMenu)
-
-  ObjRelease(pIContextMenu3)
-  ObjRelease(pIContextMenu2)
   ObjRelease(pIContextMenu)
-  pIContextMenu2 := 0
-  pIContextMenu3 := 0
-  oldWindowProc := 0
   return nID
 }
 
@@ -116,26 +105,6 @@ GetContextMenuObject(sPath)
   CoTaskMemFree(pidl)
   DllCall("FreeLibrary", "UInt", hModule)
   return pIContextMenu
-}
-
-MenuWindowProc(hWnd, nMsg, wParam, lParam)
-{
-  Critical
-  Global pIContextMenu2, pIContextMenu3, oldWindowProc
-  if (pIContextMenu3) {
-    ;IContextMenu3->HandleMenuMsg2
-    hResult := DllCall(VTable(pIContextMenu3, 7), "UInt", pIContextMenu3, "UInt", nMsg, "UInt", wParam, "UInt", lParam, "UInt*", lResult)
-    if (!hResult)
-      return lResult
-  }
-  else if (pIContextMenu2)
-  {
-    ;IContextMenu2->HandleMenuMsg
-    hResult := DllCall(VTable(pIContextMenu2, 6), "UInt", pIContextMenu2, "UInt", nMsg, "UInt", wParam, "UInt", lParam)
-    If (!hResult)
-      return 0
-  }
-  return DllCall("user32.dll\CallWindowProcW", "UInt", oldWindowProc, "Ptr", hWnd, "UInt", nMsg, "UInt", wParam, "UInt", lParam)
 }
 
 VTable(ppv, idx)
