@@ -24,6 +24,7 @@ BTPAN_Tip_Disconnect  := "Bluetooth PAN 未接続"
 BTPAN_Menu_Connection := "Bluetooth PAN に接続(&C)"
 BTPAN_Menu_Devices    := "デバイス一覧を表示(&O)"
 BTPAN_Menu_Exit       := "終了(&X)"
+BTPAN_CheckStatusInterval := 10000 ;msec
 
 BTPAN_MenuLabel_Connect    := "接続方法(&C)"
 BTPAN_MenuLabel_Disconnect := "デバイス ネットワークからの切断(&D)"
@@ -34,7 +35,7 @@ if (FileExist(BTPAN_LinkPath) == "") {
   MsgBox Please create Bluetooth Device Link.`n=> %BTPAN_LinkPath%
   ExitApp 1
 }
-BTPAN__updateTaskTray()
+BTPAN__checkStatus(True)
 return
 
 
@@ -233,8 +234,28 @@ BTPAN__setConnection(connect)
   } else {
     ShellContextMenu(BTPAN_LinkPath, BTPAN_MenuLabel_Disconnect)
   }
-  BTPAN__updateTaskTray()
+  BTPAN__checkStatus()
 }
+
+
+BTPAN__checkStatus(forceUpdate=False)
+{
+  global BTPAN_lastConnectionStatus, BTPAN_CheckStatusInterval
+  connected := BTPAN__isConnected()
+  if (forceUpdate || BTPAN_lastConnectionStatus != connected) {
+    BTPAN_lastConnectionStatus := connected
+    if (connected) {
+      SetTimer BTPAN__checkStatusCallback, %BTPAN_CheckStatusInterval%
+    } else {
+      SetTimer BTPAN__checkStatusCallback, Off
+    }
+    BTPAN__updateTaskTray()
+  }
+}
+
+BTPAN__checkStatusCallback:
+  BTPAN__checkStatus()
+  return
 
 
 BTPAN__updateTaskTray()
