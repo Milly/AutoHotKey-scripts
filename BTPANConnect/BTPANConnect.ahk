@@ -57,9 +57,6 @@ ShellLinkResolveDisplayName(sPath, uFlag=0)
     ;IPersistFile->Load
     if (hResult := DllCall(VTable(pIPersistFile, 5), "Ptr", pIPersistFile, "Str", sPath, "UInt", STGM_Read))
       return False
-    ;IShellLink->Resolve
-    ; if (hResult := DllCall(VTable(pIShellLink, 19), "Ptr", pIShellLink, "Ptr", A_ScriptHwnd, "UInt", SLR_NO_UI))
-    ;   return False
     ;IShellLink->GetIDList
     if (hResult := DllCall(VTable(pIShellLink, 4), "Ptr", pIShellLink, "Ptr*", pidl))
       return False
