@@ -36,6 +36,7 @@ BTPAN_Tip_Connect     := "Bluetooth PAN アクセス"
 BTPAN_Tip_Disconnect  := "Bluetooth PAN 未接続"
 BTPAN_Menu_Connection := "Bluetooth PAN に接続(&C)"
 BTPAN_Menu_Devices    := "デバイス一覧を表示(&O)"
+BTPAN_Menu_Exit       := "終了(&X)"
 
 BTPAN_MenuLabel_Connect    := "接続方法(&C)"
 BTPAN_MenuLabel_Disconnect := "デバイス ネットワークからの切断(&D)"
@@ -271,6 +272,7 @@ BTPAN__updateTaskTray()
   Menu Tray, %check%, %BTPAN_Menu_Connection%
   Menu Tray, Default, %BTPAN_Menu_Connection%
   Menu Tray, Add, %BTPAN_Menu_Devices%, MENU_openDevicesFolder
+  Menu Tray, Add, %BTPAN_Menu_Exit%, MENU_exitApplication
   Menu Tray, Icon ;enable tray icon
 }
 
@@ -306,6 +308,9 @@ MENU_toggleConnection:
 MENU_openDevicesFolder:
   Run explorer.exe "shell:%SHELL_DevicesAndPrinters%"
   return
+
+MENU_exitApplication:
+  ExitApp 0
 
 
 ; Hook Keys -----------------------------------------{{{1
