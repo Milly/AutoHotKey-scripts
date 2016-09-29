@@ -24,12 +24,18 @@
 ; Initialize -----------------------------------------{{{1
 
 #NoEnv
+#NoTrayIcon
 SendMode Input
 Menu Tray, NoMainWindow
+Menu Tray, NoStandard
 
 BTPAN_LinkPath        := A_ScriptDir . "\BTLink.lnk"
 BTPAN_Icon_Connect    := A_ScriptDir . "\BTConnect.ico"
 BTPAN_Icon_Disconnect := A_ScriptDir . "\BTDisconnect.ico"
+BTPAN_Tip_Connect     := "Bluetooth PAN アクセス"
+BTPAN_Tip_Disconnect  := "Bluetooth PAN 未接続"
+BTPAN_Menu_Connection := "Bluetooth PAN に接続(&C)"
+
 BTPAN_MenuLabel_Connect    := "接続方法(&C)"
 BTPAN_MenuLabel_Disconnect := "デバイス ネットワークからの切断(&D)"
 
@@ -38,6 +44,7 @@ if (FileExist(BTPAN_LinkPath) == "") {
   ExitApp 1
 }
 BTPAN__updateTaskTray()
+return
 
 
 ; Common Functions -----------------------------------------{{{1
@@ -182,16 +189,23 @@ BTPAN__setConnection(connect)
 
 BTPAN__updateTaskTray()
 {
-  global BTPAN_Icon_Connect, BTPAN_Icon_Disconnect
+  local icon, state, check
   if (BTPAN__isConnected()) {
     icon := BTPAN_Icon_Connect
-    state := "Connecting"
+    state := BTPAN_Tip_Connect
+    check := "Check"
   } else {
     icon := BTPAN_Icon_Disconnect
-    state := "Disconnect"
+    state := BTPAN_Tip_Disconnect
+    check := "Uncheck"
   }
   Menu Tray, Icon, %icon%
-  Menu Tray, Tip, Bluetooth PAN`n%state%
+  Menu Tray, Tip, %state%
+  Menu Tray, DeleteAll
+  Menu Tray, Add, %BTPAN_Menu_Connection%, MENU_toggleConnection
+  Menu Tray, %check%, %BTPAN_Menu_Connection%
+  Menu Tray, Default, %BTPAN_Menu_Connection%
+  Menu Tray, Icon ;enable tray icon
 }
 
 BTPAN__connect()
@@ -212,6 +226,12 @@ BTPAN__toggleConnection()
 {
   BTPAN__setConnection(!BTPAN__isConnected())
 }
+
+; Menu Commands -----------------------------------------{{{1
+
+MENU_toggleConnection:
+  BTPAN__toggleConnection()
+  return
 
 ; Hook Keys -----------------------------------------{{{1
 
