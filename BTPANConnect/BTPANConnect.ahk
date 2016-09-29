@@ -1,6 +1,6 @@
 ﻿;=====================================================================
 ; Bluetooth PAN Connect
-;   Last Changed: 29 Sep 2016
+;   Last Changed: 30 Sep 2016
 ;=====================================================================
 
 ; Usage -----------------------------------------{{{1
@@ -35,11 +35,14 @@ BTPAN_Icon_Disconnect := A_ScriptDir . "\BTDisconnect.ico"
 BTPAN_Tip_Connect     := "Bluetooth PAN アクセス"
 BTPAN_Tip_Disconnect  := "Bluetooth PAN 未接続"
 BTPAN_Menu_Connection := "Bluetooth PAN に接続(&C)"
+BTPAN_Menu_Devices    := "デバイス一覧を表示(&O)"
 
 BTPAN_MenuLabel_Connect    := "接続方法(&C)"
 BTPAN_MenuLabel_Disconnect := "デバイス ネットワークからの切断(&D)"
+SHELL_DevicesAndPrinters := "::{A8A91A66-3A7D-4424-8D24-04E180695C7A}"
 
 if (FileExist(BTPAN_LinkPath) == "") {
+  Run explorer.exe "shell:%SHELL_DevicesAndPrinters%"
   MsgBox Please create Bluetooth Device Link.`n=> %BTPAN_LinkPath%
   ExitApp 1
 }
@@ -48,6 +51,56 @@ return
 
 
 ; Common Functions -----------------------------------------{{{1
+
+ShellLinkResolveDisplayName(sPath, uFlag=0)
+{
+  static CLSID_ShellLink  := "{00021401-0000-0000-C000-000000000046}"
+  static IID_IShellLinkW  := "{000214F9-0000-0000-C000-000000000046}"
+  static IID_IPersistFile := "{0000010b-0000-0000-C000-000000000046}"
+  static STGM_Read := 0x00000000
+  static SLR_NO_UI := 0x0001
+
+  pIShellLink := ComObjCreate(CLSID_ShellLink, IID_IShellLinkW)
+  pIPersistFile := ComObjQuery(pIShellLink, IID_IPersistFile)
+  try {
+    if (hResult := DllCall("shell32\SHGetDesktopFolder", "Ptr*", pIShellFolder))
+      return False
+    ;IPersistFile->Load
+    if (hResult := DllCall(VTable(pIPersistFile, 5), "Ptr", pIPersistFile, "Str", sPath, "UInt", STGM_Read))
+      return False
+    ;IShellLink->Resolve
+    ; if (hResult := DllCall(VTable(pIShellLink, 19), "Ptr", pIShellLink, "Ptr", A_ScriptHwnd, "UInt", SLR_NO_UI))
+    ;   return False
+    ;IShellLink->GetIDList
+    if (hResult := DllCall(VTable(pIShellLink, 4), "Ptr", pIShellLink, "Ptr*", pidl))
+      return False
+    return ShellGetDisplayNameOf(pIShellFolder, pidl, uFlag)
+  } catch e {
+    return False
+  } finally {
+    ObjRelease(pIShellFolder)
+    ObjRelease(pIPersistFile)
+    ObjRelease(pIShellLink)
+    CoTaskMemFree(pidl)
+  }
+}
+
+
+ShellGetDisplayNameOf(pIShellFolder, pidl, uFlag)
+{
+  VarSetCapacity(name, 264, 0)  ;STRRET
+  ;IShellFolder->GetDisplayNameOf
+  if (hResult := DllCall(VTable(pIShellFolder, 11), "Ptr", pIShellFolder, "Ptr", pidl, "UInt", uFlag, "Ptr", &name))
+    return False
+  if (hResult := DllCall("shlwapi\StrRetToStr", "Ptr", &name, "Ptr", pidl, "Ptr*", pName))
+    return False
+  try {
+    return StrGet(pName, "UTF-16")
+  } finally {
+    CoTaskMemFree(pName)
+  }
+}
+
 
 ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
 {
@@ -166,7 +219,8 @@ GUID4String(ByRef CLSID, String)
 
 CoTaskMemFree(pv)
 {
-  return DllCall("ole32\CoTaskMemFree", "Ptr", pv)
+  if (pv)
+    return DllCall("ole32\CoTaskMemFree", "Ptr", pv)
 }
 
 
@@ -197,22 +251,26 @@ BTPAN__setConnection(connect)
 
 BTPAN__updateTaskTray()
 {
-  local icon, state, check
+  local icon, state, check, target
   if (BTPAN__isConnected()) {
     icon := BTPAN_Icon_Connect
     state := BTPAN_Tip_Connect
     check := "Check"
+    if (target := ShellLinkResolveDisplayName(BTPAN_LinkPath))
+      target .= "`n"
   } else {
     icon := BTPAN_Icon_Disconnect
     state := BTPAN_Tip_Disconnect
     check := "Uncheck"
+    target := ""
   }
   Menu Tray, Icon, %icon%
-  Menu Tray, Tip, %state%
+  Menu Tray, Tip, %target%%state%
   Menu Tray, DeleteAll
   Menu Tray, Add, %BTPAN_Menu_Connection%, MENU_toggleConnection
   Menu Tray, %check%, %BTPAN_Menu_Connection%
   Menu Tray, Default, %BTPAN_Menu_Connection%
+  Menu Tray, Add, %BTPAN_Menu_Devices%, MENU_openDevicesFolder
   Menu Tray, Icon ;enable tray icon
 }
 
@@ -243,6 +301,10 @@ BTPAN__toggleConnection()
 
 MENU_toggleConnection:
   BTPAN__toggleConnection()
+  return
+
+MENU_openDevicesFolder:
+  Run explorer.exe "shell:%SHELL_DevicesAndPrinters%"
   return
 
 
