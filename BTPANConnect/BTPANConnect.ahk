@@ -1,4 +1,4 @@
-;=====================================================================
+ï»¿;=====================================================================
 ; Bluetooth PAN Connect
 ;   Last Changed: 29 Sep 2016
 ;=====================================================================
@@ -9,8 +9,8 @@
 SendMode Input
 
 BTPAN_LinkPath := A_ScriptDir . "\BTLink.lnk"
-BTPAN_MenuLabel_Connect    := "Ú‘±•û–@(&C)"
-BTPAN_MenuLabel_Disconnect := "ƒfƒoƒCƒX ƒlƒbƒgƒ[ƒN‚©‚ç‚ÌØ’f(&D)"
+BTPAN_MenuLabel_Connect    := "æŽ¥ç¶šæ–¹æ³•(&C)"
+BTPAN_MenuLabel_Disconnect := "ãƒ‡ãƒã‚¤ã‚¹ ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‹ã‚‰ã®åˆ‡æ–­(&D)"
 
 if (FileExist(BTPAN_LinkPath) == "") {
   MsgBox Please create Bluetooth Device Link.`n=> %BTPAN_LinkPath%
