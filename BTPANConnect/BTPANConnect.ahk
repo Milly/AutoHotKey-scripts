@@ -25,8 +25,11 @@
 
 #NoEnv
 SendMode Input
+Menu Tray, NoMainWindow
 
-BTPAN_LinkPath := A_ScriptDir . "\BTLink.lnk"
+BTPAN_LinkPath        := A_ScriptDir . "\BTLink.lnk"
+BTPAN_Icon_Connect    := A_ScriptDir . "\BTConnect.ico"
+BTPAN_Icon_Disconnect := A_ScriptDir . "\BTDisconnect.ico"
 BTPAN_MenuLabel_Connect    := "接続方法(&C)"
 BTPAN_MenuLabel_Disconnect := "デバイス ネットワークからの切断(&D)"
 
@@ -34,6 +37,8 @@ if (FileExist(BTPAN_LinkPath) == "") {
   MsgBox Please create Bluetooth Device Link.`n=> %BTPAN_LinkPath%
   ExitApp 1
 }
+BTPAN__updateTaskTray()
+
 
 ; Common Functions -----------------------------------------{{{1
 
@@ -172,6 +177,21 @@ BTPAN__setConnection(connect)
   } else {
     ShellContextMenu(BTPAN_LinkPath, BTPAN_MenuLabel_Disconnect)
   }
+  BTPAN__updateTaskTray()
+}
+
+BTPAN__updateTaskTray()
+{
+  global BTPAN_Icon_Connect, BTPAN_Icon_Disconnect
+  if (BTPAN__isConnected()) {
+    icon := BTPAN_Icon_Connect
+    state := "Connecting"
+  } else {
+    icon := BTPAN_Icon_Disconnect
+    state := "Disconnect"
+  }
+  Menu Tray, Icon, %icon%
+  Menu Tray, Tip, Bluetooth PAN`n%state%
 }
 
 BTPAN__connect()
