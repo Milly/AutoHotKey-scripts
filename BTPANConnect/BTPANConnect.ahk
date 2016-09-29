@@ -174,13 +174,12 @@ CoTaskMemFree(pv)
 
 BTPAN__isConnected()
 {
-  psScript =
-(
-  $a = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter "\"ServiceName=`'BthPan`'\"";
-  exit [int]($a.IPAddress.Length -ne 0)
-)
-  RunWait powershell.exe -noprofile -command %psScript%, , hide
-  return %ErrorLevel%
+  wmiService := ComObjGet("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+  adapters := wmiService.ExecQuery("Select * from Win32_NetworkAdapterConfiguration")
+  for adp in adapters
+    if (adp.ServiceName == "BthPan")
+      return adp.IPAddress.MaxIndex() != ""
+  return False
 }
 
 
