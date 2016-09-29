@@ -31,24 +31,7 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
     DllCall("GetCursorPos", "Int64*", pt)
     nID := DllCall("TrackPopupMenuEx", "Ptr", hMenu, "UInt", 0x0100|0x0001, "Int", pt << 32 >> 32, "Int", pt >> 32, "Ptr", A_ScriptHwnd, "UInt", 0)
   } else {
-    MF_BYPOSITION := 0x0400
-    nMaxLen := 100
-    VarSetCapacity(sLabel, nMaxLen*2, 0)
-    nID := 0
-    itemCount := DllCall("GetMenuItemCount", "Ptr", hMenu)
-    loop %itemCount% {
-      nPos := A_Index-1
-      DllCall("GetMenuString", "Ptr", hMenu, "UInt", nPos, "Str", sLabel, "Int", nMaxLen, "UInt", MF_BYPOSITION)
-      if (sLabel == targetLabel) {
-        hSubMenu := DllCall("GetSubMenu", "Ptr", hMenu, "UInt", nPos, "Ptr")
-        if (hSubMenu != 0) {
-          nID := DllCall("GetMenuItemID", "Ptr", hSubMenu, "UInt", nSubMenuPos)
-        } else {
-          nID := DllCall("GetMenuItemID", "Ptr", hMenu, "UInt", nPos)
-        }
-        break
-      }
-    }
+    nID := FindMenuCommand(hMenu, targetLabel, nSubMenuPos)
   }
 
   if (nID != 0) {
@@ -76,6 +59,26 @@ GetContextMenuObject(sPath)
   CoTaskMemFree(pidl)
   DllCall("FreeLibrary", "UInt", hModule)
   return pIContextMenu
+}
+
+FindMenuCommand(hMenu, targetLabel, nSubMenuPos=0)
+{
+  MF_BYPOSITION := 0x0400
+  nMaxLen := 100
+  VarSetCapacity(sLabel, nMaxLen*2, 0)
+  itemCount := DllCall("GetMenuItemCount", "Ptr", hMenu)
+  loop %itemCount% {
+    nPos := A_Index-1
+    DllCall("GetMenuString", "Ptr", hMenu, "UInt", nPos, "Str", sLabel, "Int", nMaxLen, "UInt", MF_BYPOSITION)
+    if (sLabel == targetLabel) {
+      hSubMenu := DllCall("GetSubMenu", "Ptr", hMenu, "UInt", nPos, "Ptr")
+      if (hSubMenu != 0) {
+        return DllCall("GetMenuItemID", "Ptr", hSubMenu, "UInt", nSubMenuPos)
+      }
+      return DllCall("GetMenuItemID", "Ptr", hMenu, "UInt", nPos)
+    }
+  }
+  return 0
 }
 
 InvokeMenuCommand(pIContextMenu, nID)
