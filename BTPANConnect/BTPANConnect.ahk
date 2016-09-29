@@ -1,6 +1,9 @@
 ﻿;=====================================================================
 ; Bluetooth PAN Connect
-;   Last Changed: 30 Sep 2016
+;
+; Author: Milly
+; Last Changed: 30 Sep 2016
+; Update: https://github.com/Milly/AutoHotKey-scripts/releases/
 ;=====================================================================
 
 ; Usage -----------------------------------------{{{1
