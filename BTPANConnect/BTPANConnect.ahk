@@ -35,6 +35,8 @@ Menu Tray, NoStandard
 BTPAN_LinkPath        := A_ScriptDir . "\BTLink.lnk"
 BTPAN_Icon_Connect    := A_ScriptDir . "\BTConnect.ico"
 BTPAN_Icon_Disconnect := A_ScriptDir . "\BTDisconnect.ico"
+BTPAN_IconResource_Connect    := -159
+BTPAN_IconResource_Disconnect := -250
 BTPAN_Tip_Connect     := "Bluetooth PAN アクセス"
 BTPAN_Tip_Disconnect  := "Bluetooth PAN 未接続"
 BTPAN_Menu_Connection := "Bluetooth PAN に接続(&C)"
@@ -255,20 +257,26 @@ BTPAN__setConnection(connect)
 
 BTPAN__updateTaskTray()
 {
-  local icon, state, check, target
+  local icon, iconResource, state, check, target
   if (BTPAN__isConnected()) {
     icon := BTPAN_Icon_Connect
+    iconResource := BTPAN_IconResource_Connect
     state := BTPAN_Tip_Connect
     check := "Check"
     if (target := ShellLinkResolveDisplayName(BTPAN_LinkPath))
       target .= "`n"
   } else {
     icon := BTPAN_Icon_Disconnect
+    iconResource := BTPAN_IconResource_Disconnect
     state := BTPAN_Tip_Disconnect
     check := "Uncheck"
     target := ""
   }
-  Menu Tray, Icon, %icon%
+  if (A_IsCompiled) {
+    Menu Tray, Icon, %A_ScriptFullPath%, %iconResource%
+  } else {
+    Menu Tray, Icon, %icon%
+  }
   Menu Tray, Tip, %target%%state%
   Menu Tray, DeleteAll
   Menu Tray, Add, %BTPAN_Menu_Connection%, MENU_toggleConnection
