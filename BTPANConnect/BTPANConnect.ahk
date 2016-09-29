@@ -73,6 +73,7 @@ ShellContextMenu(sPath, targetLabel="", nSubMenuPos=0)
   return nID
 }
 
+
 GetContextMenuObject(sPath)
 {
   hModule := DllCall("LoadLibrary", "Str", "shell32.dll", "Ptr")
@@ -90,6 +91,7 @@ GetContextMenuObject(sPath)
   DllCall("FreeLibrary", "UInt", hModule)
   return pIContextMenu
 }
+
 
 FindMenuCommand(hMenu, targetLabel, nSubMenuPos=0)
 {
@@ -110,6 +112,7 @@ FindMenuCommand(hMenu, targetLabel, nSubMenuPos=0)
   }
   return 0
 }
+
 
 InvokeMenuCommand(pIContextMenu, nID)
 {
@@ -147,10 +150,12 @@ InvokeMenuCommand(pIContextMenu, nID)
   DllCall(VTable(pIContextMenu, 4), "Ptr", pIContextMenu, "Ptr", &pici)
 }
 
+
 VTable(ppv, idx)
 {
   return NumGet(NumGet(1 * ppv) + A_PtrSize * idx)
 }
+
 
 GUID4String(ByRef CLSID, String)
 {
@@ -158,10 +163,12 @@ GUID4String(ByRef CLSID, String)
   return DllCall("ole32\CLSIDFromString", "WStr", String, "Ptr", &CLSID) >= 0 ? &CLSID : ""
 }
 
+
 CoTaskMemFree(pv)
 {
   return DllCall("ole32\CoTaskMemFree", "Ptr", pv)
 }
+
 
 ; Bluetooth PAN Functions -----------------------------------------{{{1
 
@@ -176,6 +183,7 @@ BTPAN__isConnected()
   return %ErrorLevel%
 }
 
+
 BTPAN__setConnection(connect)
 {
   global BTPAN_LinkPath, BTPAN_MenuLabel_Connect, BTPAN_MenuLabel_Disconnect
@@ -186,6 +194,7 @@ BTPAN__setConnection(connect)
   }
   BTPAN__updateTaskTray()
 }
+
 
 BTPAN__updateTaskTray()
 {
@@ -208,12 +217,14 @@ BTPAN__updateTaskTray()
   Menu Tray, Icon ;enable tray icon
 }
 
+
 BTPAN__connect()
 {
   if (!BTPAN__isConnected()) {
     BTPAN__setConnection(True)
   }
 }
+
 
 BTPAN__disconnect()
 {
@@ -222,10 +233,12 @@ BTPAN__disconnect()
   }
 }
 
+
 BTPAN__toggleConnection()
 {
   BTPAN__setConnection(!BTPAN__isConnected())
 }
+
 
 ; Menu Commands -----------------------------------------{{{1
 
@@ -233,8 +246,10 @@ MENU_toggleConnection:
   BTPAN__toggleConnection()
   return
 
+
 ; Hook Keys -----------------------------------------{{{1
 
 #z:: BTPAN__toggleConnection()
+
 
 ; vim: set ts=2 sw=2 et fdm=marker fmr={{{,}}} :
