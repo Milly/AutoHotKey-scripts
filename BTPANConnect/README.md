@@ -31,4 +31,7 @@
 
 ## ライセンス
 
+* This software is released under the NYSL License 0.9982.
+  * http://www.kmonos.net/nysl/
 * Author: Milly
+

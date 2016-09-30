@@ -4,6 +4,8 @@
 ; Author: Milly
 ; Last Changed: 30 Sep 2016
 ; Update: https://github.com/Milly/AutoHotKey-scripts/releases/
+;
+; This software is released under the NYSL License 0.9982.
 ;=====================================================================
 
 ; Initialize -----------------------------------------{{{1
