@@ -2,6 +2,8 @@
 
 ホットキーやタスクトレイから Bluetooth PAN の接続を行えるようにします。
 
+![BTPANConnect Tasktray](https://cloud.githubusercontent.com/assets/22977/18980220/1943c21e-870d-11e6-957d-f3ed56796b1e.png)
+
 
 ## インストール
 
@@ -20,8 +22,13 @@
 * スタートアップに登録しておくと便利です。
 
 
-## 更新情報
+## ダウンロード
+
+* Releases https://github.com/Milly/AutoHotKey-scripts/releases/
+  * `BTPANConnect_***_x64.zip` (バイナリ配布ファイル)
+  * `Source code (zip)` (その他雑多なスクリプトを含むソースファイル)
+
+
+## ライセンス
 
 * Author: Milly
-* Update: https://github.com/Milly/AutoHotKey-scripts/releases/
-
