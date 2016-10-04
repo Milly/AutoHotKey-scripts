@@ -1,4 +1,6 @@
 @setlocal enableextensions
+@cd "%~p0"
+
 @set src=BTPANConnect.ahk
 @set dest=BTPANConnect.exe
 @set icon=BTConnect.ico
