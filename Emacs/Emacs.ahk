@@ -7,6 +7,8 @@
 #UseHook
 StringCaseSense, On
 
+ENABLE_CMD_PROMPT := True
+
 ; Vars {
 
 ; Icons
@@ -405,7 +407,7 @@ cmd_search_backward() {
 
 ;}
 
-#If is_cmd_prompt_active() ;{
+#If ENABLE_CMD_PROMPT && is_cmd_prompt_active() ;{
 
 ; single commands {
 ^a::	move_beginning_of_line()
