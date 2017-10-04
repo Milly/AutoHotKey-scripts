@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 09 Jun 2016
+;   Last Changed: 04 Oct 2017
 ;=====================================================================
 
 #InstallKeybdHook
@@ -120,6 +120,37 @@ confirm_exit() {
 	IfMsgBox, Yes
 		ExitApp
 }
+
+show_suspend_popup() {
+	global
+	suspend_popup_trans := 500
+	Gui, 1:Destroy
+	if (A_IsSuspended) {
+		Gui, 1:Color, 222222
+		Gui, 1:Font, Caaaaaa S50 Strike
+	} else {
+		Gui, 1:Color, 222288
+		Gui, 1:Font, Cffffff S50
+	}
+	Gui, 1:Margin, 20, 20
+	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption
+	WinSet, TransParent, 250
+	Gui, 1:Add, Text, Center, Emacs
+	Gui, 1:Show
+	SetTimer, SuspendPopupFadeOut, 20
+}
+
+SuspendPopupFadeOut: ; {
+	suspend_popup_trans := suspend_popup_trans - 40
+	if (suspend_popup_trans <= 0) {
+		SetTimer, SuspendPopupFadeOut, Off
+		Gui, 1:Destroy
+	} else if (suspend_popup_trans < 250) {
+		Gui, 1:+LastFound
+		WinSet, TransParent, %suspend_popup_trans%
+	}
+	Return
+; }
 
 ; }
 
@@ -367,6 +398,7 @@ cmd_search_backward() {
 ; toggle suspend {
 ^q::
 	Suspend
+	show_suspend_popup()
 	update_icon()
 	Return
 ;}
