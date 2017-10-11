@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 04 Oct 2017
+;   Last Changed: 12 Oct 2017
 ;=====================================================================
 
 #InstallKeybdHook
@@ -124,7 +124,8 @@ confirm_exit() {
 }
 
 show_suspend_popup() {
-	global
+	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
+	global suspend_popup_trans
 	suspend_popup_trans := 500
 	Gui, 1:Destroy
 	if (A_IsSuspended) {
@@ -135,14 +136,14 @@ show_suspend_popup() {
 		Gui, 1:Font, Cffffff S50
 	}
 	Gui, 1:Margin, 20, 20
-	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption
+	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
 	WinSet, TransParent, 250
 	Gui, 1:Add, Text, Center, Emacs
-	Gui, 1:Show
+	Gui, 1:Show, NA Center AutoSize
 	SetTimer, SuspendPopupFadeOut, 20
-}
+	Return
 
-SuspendPopupFadeOut: ; {
+SuspendPopupFadeOut:
 	suspend_popup_trans := suspend_popup_trans - 40
 	if (suspend_popup_trans <= 0) {
 		SetTimer, SuspendPopupFadeOut, Off
@@ -152,7 +153,7 @@ SuspendPopupFadeOut: ; {
 		WinSet, TransParent, %suspend_popup_trans%
 	}
 	Return
-; }
+}
 
 ; }
 
