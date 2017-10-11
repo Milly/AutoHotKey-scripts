@@ -3,6 +3,7 @@
 ;   Last Changed: 12 Oct 2017
 ;=====================================================================
 
+#NoEnv
 #InstallKeybdHook
 #UseHook
 StringCaseSense, On
