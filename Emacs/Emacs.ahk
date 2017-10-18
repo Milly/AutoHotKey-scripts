@@ -204,8 +204,20 @@ delete_backward_char() {
 	Send {BS}
 	clear_pre_spc()
 }
+kill_word() {
+	Send {ShiftDown}^{RIGHT}{ShiftUp}
+	Sleep 10 ;[ms]
+	Send ^x
+	clear_pre_spc()
+}
+backward_kill_word() {
+	Send {ShiftDown}^{LEFT}{ShiftUp}
+	Sleep 10 ;[ms]
+	Send ^x
+	clear_pre_spc()
+}
 kill_line() {
-	Send {ShiftDown}{END}{SHIFTUP}
+	Send {ShiftDown}{END}{ShiftUp}
 	Sleep 10 ;[ms]
 	Send ^x
 	clear_pre_spc()
@@ -287,6 +299,20 @@ move_end_of_line() {
 	Else
 		Send {END}
 }
+beginning_of_buffer() {
+	global
+	If is_pre_spc
+		Send +^{HOME}
+	Else
+		Send ^{HOME}
+}
+end_of_buffer() {
+	global
+	If is_pre_spc
+		Send +^{END}
+	Else
+		Send ^{END}
+}
 previous_line() {
 	global
 	If is_pre_spc
@@ -314,6 +340,20 @@ backward_char() {
 		Send +{Left}
 	Else
 		Send {Left}
+}
+forward_word() {
+	global
+	If is_pre_spc
+		Send +^{Right}
+	Else
+		Send ^{Right}
+}
+backward_word() {
+	global
+	If is_pre_spc
+		Send +^{Left}
+	Else
+		Send ^{Left}
 }
 scroll_up() {
 	global
@@ -372,9 +412,13 @@ cmd_search_backward() {
 ; single commands {
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
+!b::	backward_word()
 ^d::	delete_char()
+!d::	kill_word()
+!BS::	backward_kill_word()
 ^e::	move_end_of_line()
 ^f::	forward_char()
+!f::	forward_word()
 ^g::	quit()
 ^h::	delete_backward_char()
 ^i::	indent_for_tab_command()
@@ -395,6 +439,8 @@ cmd_search_backward() {
 ^?::	redo()
 ^@::	toggle_pre_spc()
 ^_::	undo()
+!<::	beginning_of_buffer()
+!>::	end_of_buffer()
 ^Space::	toggle_pre_spc()
 ;}
 
