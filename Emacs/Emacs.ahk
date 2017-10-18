@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 12 Oct 2017
+;   Last Changed: 19 Oct 2017
 ;=====================================================================
 
 #NoEnv
@@ -125,35 +125,55 @@ confirm_exit() {
 }
 
 show_suspend_popup() {
-	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
-	global suspend_popup_trans
-	suspend_popup_trans := 500
-	Gui, 1:Destroy
 	if (A_IsSuspended) {
-		Gui, 1:Color, 222222
-		Gui, 1:Font, Caaaaaa S50 Strike
+		bgcolor := ""
+		font := "Caaaaaa Strike"
 	} else {
-		Gui, 1:Color, 222288
-		Gui, 1:Font, Cffffff S50
+		bgcolor := "222288"
+		font := ""
 	}
+	show_popup("Emacs", bgcolor, font)
+}
+
+show_popup(label, bgcolor = "", font = "", timeout = 150, transparent = 250) {
+	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
+	global popup_trans
+	popup_trans := transparent
+	hide_popup()
+	if (bgcolor == "") {
+		bgcolor := "222222"
+	}
+	Gui, 1:Color, %bgcolor%
+	Gui, 1:Font, Cffffff S50 %font%
 	Gui, 1:Margin, 20, 20
 	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
-	WinSet, TransParent, 250
-	Gui, 1:Add, Text, Center, Emacs
+	WinSet, TransParent, %transparent%
+	Gui, 1:Add, Text, Center, %label%
 	Gui, 1:Show, NA Center AutoSize
-	SetTimer, SuspendPopupFadeOut, 20
-	Return
-
-SuspendPopupFadeOut:
-	suspend_popup_trans := suspend_popup_trans - 40
-	if (suspend_popup_trans <= 0) {
-		SetTimer, SuspendPopupFadeOut, Off
-		Gui, 1:Destroy
-	} else if (suspend_popup_trans < 250) {
-		Gui, 1:+LastFound
-		WinSet, TransParent, %suspend_popup_trans%
+	if (0 < timeout) {
+		SetTimer, PopupTimeout, % -timeout
 	}
 	Return
+
+PopupTimeout:
+	SetTimer, PopupFadeOut, 20
+	Return
+
+PopupFadeOut:
+	popup_trans := popup_trans - 40
+	if (popup_trans <= 0) {
+		hide_popup()
+	} else {
+		Gui, 1:+LastFound
+		WinSet, TransParent, %popup_trans%
+	}
+	Return
+}
+
+hide_popup() {
+	SetTimer, PopupTimeout, Off
+	SetTimer, PopupFadeOut, Off
+	Gui, 1:Destroy
 }
 
 ; }
