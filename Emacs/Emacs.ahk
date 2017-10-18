@@ -7,6 +7,7 @@
 #InstallKeybdHook
 #UseHook
 StringCaseSense, On
+SetBatchLines, -1
 
 ENABLE_CMD_PROMPT := True
 
