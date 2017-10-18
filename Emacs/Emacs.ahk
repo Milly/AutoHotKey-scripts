@@ -16,6 +16,8 @@ ENABLE_CMD_PROMPT := True
 icon_normal  := A_ScriptDir . "\Emacs-n.ico"
 icon_disable := A_ScriptDir . "\Emacs-d.ico"
 icon_pre_x   := A_ScriptDir . "\Emacs-x.ico"
+
+; Active window ID
 active_id      := 0
 last_active_id := 0
 
@@ -24,6 +26,24 @@ is_pre_x   := False
 
 ; Flag: C-Space
 is_pre_spc := False
+
+; Windows classes to invalidate keybinding
+INVALIDATE_TARGETS := "
+(C LTrim Join,
+	ConsoleWindowClass        ; Command Prompt, Cygwin
+	TMobaXtermForm            ; MobaXTerm
+	Vim                       ; GVim
+	PuTTY                     ; Putty
+	mintty                    ; mintty
+	VirtualConsoleClass       ; ConEmu
+	VNCMDI_Window             ; VNC
+	TscShellContainerClass    ; Remote Desktop
+)"
+
+INVALIDATE_CONTAINS := "
+(C LTrim Join,
+	cygwin/x                  ; Cygwin X
+)"
 
 ; }
 
@@ -45,34 +65,20 @@ check_active_window() {
 	global
 	last_active_id := active_id
 	WinGet, active_id, Id, A
-	If (active_id != last_active_id)
-	{
+	if (active_id != last_active_id) {
 		clear_pre_x()
 		clear_pre_spc()
 	}
 }
 
 is_target_window_active() {
-	; ConsoleWindowClass        = Command Prompt, Cygwin
-	; TMobaXtermForm            = MobaXTerm
-	; Vim                       = GVim
-	; PuTTY                     = Putty
-	; mintty                    = mintty
-	; VirtualConsoleClass       = ConEmu
-	; VNCMDI_Window             = VNC
-	; TscShellContainerClass    = Remote Desktop
-	; cygwin/x                  = Cygwin X
-	local win_class, target_active := True
+	local win_class
 	WinGetClass, win_class, A
-	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
-	{
-		target_active := False
-	}
-	else if win_class contains cygwin/x
-	{
-		target_active := False
-	}
-	Return target_active
+	if win_class in %INVALIDATE_TARGETS%
+		Return False
+	if win_class contains %INVALIDATE_CONTAINS%
+		Return False
+	Return True
 }
 
 is_cmd_prompt_active() {
@@ -88,11 +94,11 @@ is_cmd_prompt_active() {
 
 update_icon() {
 	local icon
-	If is_pre_x
+	if (is_pre_x)
 		icon := icon_pre_x
-	Else If A_IsSuspended
+	else if (A_IsSuspended || !is_target_window_active())
 		icon := icon_disable
-	Else
+	else
 		icon := icon_normal
 	Menu, Tray, icon, %icon%,, 1
 }
