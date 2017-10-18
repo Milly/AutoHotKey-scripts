@@ -176,7 +176,7 @@ PopupTimeout:
 	Return
 
 PopupFadeOut:
-	popup_trans := popup_trans - 40
+	popup_trans -= 40
 	if (popup_trans <= 0) {
 		hide_popup()
 	} else {
