@@ -47,9 +47,8 @@ check_active_window() {
 	WinGet, active_id, Id, A
 	If (active_id != last_active_id)
 	{
-		is_pre_x   := False
-		is_pre_spc := False
-		update_icon()
+		clear_pre_x()
+		clear_pre_spc()
 	}
 }
 
@@ -102,17 +101,27 @@ clear_pre_x() {
 	global
 	is_pre_x := False
 	update_icon()
+	SetTimer, ShowPreXTimeout, Off
+	hide_popup()
 }
-toggle_pre_x() {
+
+enable_pre_x() {
 	global
-	is_pre_x := ! is_pre_x
+	is_pre_x := True
 	update_icon()
+	SetTimer, ShowPreXTimeout, -1000
+	Return
+
+ShowPreXTimeout:
+	show_popup("C-x", "228822", "", 0, 200)
+	Return
 }
 
 clear_pre_spc() {
 	global
 	is_pre_spc := False
 }
+
 toggle_pre_spc() {
 	global
 	is_pre_spc := ! is_pre_spc
@@ -385,7 +394,7 @@ cmd_search_backward() {
 ; Ctrl-x combination commands {
 ^x::
 	Suspend,On
-	toggle_pre_x()
+	enable_pre_x()
 	Input in, B I M L1 T3, {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}
 	If ErrorLevel <> Timeout
 	{
@@ -410,7 +419,7 @@ cmd_search_backward() {
 	}
 	in :=
 	Suspend,Off
-	toggle_pre_x()
+	clear_pre_x()
 	Return
 ;}
 
