@@ -10,6 +10,8 @@ StringCaseSense, On
 SetBatchLines, -1
 
 ENABLE_CMD_PROMPT := True
+KILL_RING_MAX := 60
+KILL_RING_STR_LEN := 20000
 
 ; Vars {
 
@@ -46,6 +48,12 @@ INVALIDATE_CONTAINS := "
 	cygwin/x                  ; Cygwin X
 )"
 
+; kill ring
+last_yank_pos := 0
+last_kill_pos := 0
+kill_ring := Object()
+skip_kill_ring := False
+
 ; }
 
 ; Initialize {
@@ -62,6 +70,18 @@ CheckActiveWindow:
 	check_active_window()
 	Return
 }
+
+OnClipboardChange:
+	if (!skip_kill_ring && A_EventInfo == 1) { ; text data
+		if (StrLen(Clipboard) <= KILL_RING_STR_LEN) {
+			if (++last_kill_pos > KILL_RING_MAX)
+				last_kill_pos := 1
+			kill_ring[last_kill_pos] := Clipboard
+			last_yank_pos := last_kill_pos
+		}
+	}
+	skip_kill_ring := False
+	Return
 
 ; }
 
@@ -260,7 +280,23 @@ kill_ring_save() {
 	clear_pre_spc()
 }
 yank() {
+	global last_kill_pos, last_yank_pos, kill_ring, skip_kill_ring
+	if (last_kill_pos != last_yank_pos) {
+		skip_kill_ring := True
+		Clipboard := kill_ring[last_yank_pos]
+	}
 	Send ^v
+	clear_pre_spc()
+}
+yank_pop() {
+	global last_kill_pos, last_yank_pos, kill_ring
+	if (--last_yank_pos < 1)
+		last_yank_pos := kill_ring.MaxIndex()
+	no := last_kill_pos - last_yank_pos
+	if (no < 0)
+		no += kill_ring.MaxIndex()
+	text := kill_ring[last_yank_pos]
+	show_popup(no . ": " . text, {bgcolor:"228822", font:"S16", timeout:1000, transparent:200}*)
 	clear_pre_spc()
 }
 undo() {
@@ -436,6 +472,7 @@ cmd_search_backward() {
 ^w::	kill_region()
 !w::	kill_ring_save()
 ^y::	yank()
+!y::	yank_pop()
 ^/::	undo()
 ^?::	redo()
 ^@::	toggle_pre_spc()
