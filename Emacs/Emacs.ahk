@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 19 Oct 2017
+;   Last Changed: 20 Oct 2017
 ;=====================================================================
 
 #NoEnv
@@ -50,13 +50,18 @@ INVALIDATE_CONTAINS := "
 
 ; Initialize {
 
-update_icon()
-SetTimer, CheckActiveWindow, 500
+init()
 Return
+
+init() {
+	update_icon()
+	SetTimer, CheckActiveWindow, 500
+	Return
 
 CheckActiveWindow:
 	check_active_window()
 	Return
+}
 
 ; }
 
