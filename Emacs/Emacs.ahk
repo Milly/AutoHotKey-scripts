@@ -125,7 +125,7 @@ enable_pre_x() {
 	Return
 
 ShowPreXTimeout:
-	show_popup("C-x", "228822", "", 0, 200)
+	show_popup("C-x", {bgcolor:"228822", timeout:0, transparent:200}*)
 	Return
 }
 
@@ -146,24 +146,20 @@ confirm_exit() {
 }
 
 show_suspend_popup() {
+	param := Object()
 	if (A_IsSuspended) {
-		bgcolor := ""
-		font := "Caaaaaa Strike"
+		param.font := "Caaaaaa Strike"
 	} else {
-		bgcolor := "222288"
-		font := ""
+		param.bgcolor := "222288"
 	}
-	show_popup("Emacs", bgcolor, font)
+	show_popup("Emacs", param*)
 }
 
-show_popup(label, bgcolor = "", font = "", timeout = 150, transparent = 250) {
+show_popup(label, bgcolor = "222222", font = "", timeout = 150, transparent = 250) {
 	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
 	global popup_trans
 	popup_trans := transparent
 	hide_popup()
-	if (bgcolor == "") {
-		bgcolor := "222222"
-	}
 	Gui, 1:Color, %bgcolor%
 	Gui, 1:Font, Cffffff S50 %font%
 	Gui, 1:Margin, 20, 20
