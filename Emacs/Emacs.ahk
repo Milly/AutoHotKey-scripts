@@ -9,6 +9,7 @@
 StringCaseSense, On
 
 ENABLE_CMD_PROMPT := True
+THROW_INPUT_WITH_X := True
 
 ; Vars {
 
@@ -366,12 +367,20 @@ cmd_search_backward() {
 ^x::
 	Suspend,On
 	toggle_pre_x()
-	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}
+	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
 	Input key, B I M L1 T3, %endkeys%
-	If ErrorLevel <> Timeout
+	If (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
+		key := Chr(Asc(key) + 0x60)
+	Else If (SubStr(ErrorLevel, 1, 7) = "EndKey:")
+		key := "{" . SubStr(ErrorLevel, 8) . "}"
+	If (GetKeyState("Ctrl", "P"))
+		key := "^" . key
+	If (GetKeyState("Shift", "P"))
+		key := "+" . key
+	If (GetKeyState("Alt", "P"))
+		key := "!" . key
+	If (key <> "")
 	{
-		If (Asc(key) <= 26) ; Ctrl+[a-z]
-			key := "^" . Chr(Asc(key) + 0x60)
 		If (key = "^c")
 			kill_emacs()
 		Else If (key = "^f")
@@ -388,16 +397,17 @@ cmd_search_backward() {
 			change_window_size()
 		Else If (key = "^w")
 			write_file()
+		Else If (THROW_INPUT_WITH_X)
+		{
+			If ("a" <= key && key <= "z")
+				key := "^" . key
+			Send %key%
+		}
 	}
 	key :=
 	Suspend,Off
 	toggle_pre_x()
 	Return
-;}
-
-; send original key {
-^!g::	Send ^g
-^!q::	Send ^q
 ;}
 
 ; toggle suspend {
