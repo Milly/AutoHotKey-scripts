@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 12 Oct 2017
+;   Last Changed: 24 Jan 2018
 ;=====================================================================
 
 #NoEnv
@@ -366,29 +366,30 @@ cmd_search_backward() {
 ^x::
 	Suspend,On
 	toggle_pre_x()
-	Input in, B I M L1 T3, {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}
+	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}
+	Input key, B I M L1 T3, %endkeys%
 	If ErrorLevel <> Timeout
 	{
-		If (Asc(in) <= 26) ; Ctrl+[a-z]
-			in := "^" . Chr(Asc(in) + 0x60)
-		If (in = "^c")
+		If (Asc(key) <= 26) ; Ctrl+[a-z]
+			key := "^" . Chr(Asc(key) + 0x60)
+		If (key = "^c")
 			kill_emacs()
-		Else If (in = "^f")
+		Else If (key = "^f")
 			find_file()
-		Else If (in = "k")
+		Else If (key = "k")
 			kill_buffer()
-		Else If (in = "^p")
+		Else If (key = "^p")
 			select_all()
-		Else If (in = "^s")
+		Else If (key = "^s")
 			save_buffer()
-		Else If (in = "u")
+		Else If (key = "u")
 			undo()
-		Else If (in = "w")
+		Else If (key = "w")
 			change_window_size()
-		Else If (in = "^w")
+		Else If (key = "^w")
 			write_file()
 	}
-	in :=
+	key :=
 	Suspend,Off
 	toggle_pre_x()
 	Return
