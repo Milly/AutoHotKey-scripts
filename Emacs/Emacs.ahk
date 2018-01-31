@@ -8,15 +8,18 @@
 #UseHook
 StringCaseSense, On
 
+; Vars {
+
+; Options
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
 
-; Vars {
-
 ; Icons
-icon_normal  := A_ScriptDir . "\Emacs-n.ico"
-icon_disable := A_ScriptDir . "\Emacs-d.ico"
-icon_pre_x   := A_ScriptDir . "\Emacs-x.ico"
+ICON_NORMAL  := A_ScriptDir . "\Emacs-n.ico"
+ICON_DISABLE := A_ScriptDir . "\Emacs-d.ico"
+ICON_PRE_X   := A_ScriptDir . "\Emacs-x.ico"
+
+; Window id
 active_id      := 0
 last_active_id := 0
 
@@ -79,11 +82,11 @@ is_cmd_prompt_active() {
 update_icon() {
 	local icon
 	If is_pre_x
-		icon := icon_pre_x
+		icon := ICON_PRE_X
 	Else If A_IsSuspended
-		icon := icon_disable
+		icon := ICON_DISABLE
 	Else
-		icon := icon_normal
+		icon := ICON_NORMAL
 	Menu, Tray, icon, %icon%,, 1
 }
 
