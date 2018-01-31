@@ -10,6 +10,10 @@ StringCaseSense, On
 
 ; Vars {
 
+; Ini file
+INI_FILE := A_ScriptDir . "\Emacs.ini"
+INI_DEFAULT_SECTION := "Emacs"
+
 ; Options
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
@@ -28,6 +32,49 @@ is_pre_x   := False
 
 ; Flag: C-Space
 is_pre_spc := False
+
+; }
+
+; IniFile object {
+
+IniFile := Object("_file", ""
+	, "_section", ""
+	, "__Get", "IniFile__Get"
+	, "get", "IniFile_get"
+	, "getbool", "IniFile_getbool")
+
+IniFileOpen(file, section) {
+	global IniFile
+	self := Object("_file", file
+		, "_section", section
+		, "base", IniFile)
+	return self
+}
+
+IniFile__Get(self, name) {
+	value := self.get(name)
+	if (value == "ERROR")
+		throw "KeyError"
+	return value
+}
+
+IniFile_get(self, name, default="ERROR") {
+	file := self._file
+	section := self._section
+	IniRead, value, %file%, %section%, %name%, %default%
+	return value
+}
+
+IniFile_getbool(self, name, default="ERROR") {
+	value := self.get(name, default)
+	if (value == default)
+		return default
+	if (value = "true" || value = "yes" || value = 1)
+		return True
+	if (value = "false" || value = "no" || value = 0)
+		return False
+	return default
+}
 
 ; }
 
@@ -316,6 +363,11 @@ initialize()
 Return
 
 initialize() {
+	local ini
+	ini := IniFileOpen(INI_FILE, INI_DEFAULT_SECTION)
+	ENABLE_CMD_PROMPT := ini.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
+	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
+
 	update_icon()
 	SetTimer, CheckActiveWindow, 500
 }
