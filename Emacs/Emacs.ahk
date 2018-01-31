@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 24 Jan 2018
+;   Last Changed: 01 Feb 2018
 ;=====================================================================
 
 #NoEnv
@@ -25,18 +25,6 @@ is_pre_x   := False
 
 ; Flag: C-Space
 is_pre_spc := False
-
-; }
-
-; Initialize {
-
-update_icon()
-SetTimer, CheckActiveWindow, 500
-Return
-
-CheckActiveWindow:
-	check_active_window()
-	Return
 
 ; }
 
@@ -316,6 +304,26 @@ cmd_search_backward() {
 	Send !{Space}ef!u!n
 	clear_pre_spc()
 }
+
+; }
+
+; Initialize {
+
+initialize()
+Return
+
+initialize() {
+	update_icon()
+	SetTimer, CheckActiveWindow, 500
+}
+
+; }
+
+; Subroutines {
+
+CheckActiveWindow:
+	check_active_window()
+	Return
 
 ; }
 
