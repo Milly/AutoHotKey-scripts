@@ -17,6 +17,7 @@ INI_DEFAULT_SECTION := "Emacs"
 ; Options
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
+KILL_RING_MAX := 30
 
 ; Icons
 ICON_NORMAL  := A_ScriptDir . "\Emacs-n.ico"
@@ -32,6 +33,12 @@ is_pre_x   := False
 
 ; Flag: C-Space
 is_pre_spc := False
+
+; kill ring
+kill_ring_last := 0
+kill_ring_pos := 0
+kill_ring_pop := False
+kill_ring := Object()
 
 ; }
 
@@ -90,6 +97,32 @@ check_active_window() {
 		is_pre_spc := False
 		update_icon()
 	}
+}
+
+on_clipboard_change() {
+	global
+	if (kill_ring_pop)
+		Return
+	if (A_EventInfo == 0)
+		Return
+	if (++kill_ring_last > KILL_RING_MAX)
+		kill_ring_last := 1
+	kill_ring_%kill_ring_last% := ClipboardAll
+	kill_ring_pos := kill_ring_last
+}
+
+pop_kill_ring() {
+	global
+	if (kill_ring_pos == 0)
+		Return
+	if (--kill_ring_pos < 1)
+		kill_ring_pos := KILL_RING_MAX
+	if (StrLen(kill_ring_%kill_ring_pos%) == 0)
+		kill_ring_pos := kill_ring_last
+	kill_ring_pop := True
+	Clipboard := kill_ring_%kill_ring_pos%
+	Sleep 10 ;[ms]
+	kill_ring_pop := False
 }
 
 is_target_window_active() {
@@ -253,6 +286,12 @@ yank() {
 	Send ^v
 	clear_pre_spc()
 }
+yank_pop() {
+	Send ^z
+	pop_kill_ring()
+	Send ^v
+	clear_pre_spc()
+}
 undo() {
 	Send ^z
 	clear_pre_spc()
@@ -367,6 +406,7 @@ initialize() {
 	ini := IniFileOpen(INI_FILE, INI_DEFAULT_SECTION)
 	ENABLE_CMD_PROMPT := ini.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
 	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
+	KILL_RING_MAX := ini.get("KillRingMax", KILL_RING_MAX)
 
 	update_icon()
 	SetTimer CheckActiveWindow, 500
@@ -378,6 +418,10 @@ initialize() {
 
 CheckActiveWindow:
 	check_active_window()
+	Return
+
+OnClipboardChange:
+	on_clipboard_change()
 	Return
 
 ; }
@@ -419,6 +463,7 @@ CheckActiveWindow:
 ^w::	kill_region()
 !w::	kill_ring_save()
 ^y::	yank()
+!y::	yank_pop()
 ^/::	undo()
 ^?::	redo()
 ^@::	toggle_pre_spc()
