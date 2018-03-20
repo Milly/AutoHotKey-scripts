@@ -1,12 +1,12 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 01 Feb 2018
+;   Last Changed: 20 Mar 2018
 ;=====================================================================
 
 #NoEnv
 #InstallKeybdHook
 #UseHook
-StringCaseSense, On
+StringCaseSense On
 
 ; Vars {
 
@@ -61,7 +61,7 @@ IniFile__Get(self, name) {
 IniFile_get(self, name, default="ERROR") {
 	file := self._file
 	section := self._section
-	IniRead, value, %file%, %section%, %name%, %default%
+	IniRead value, %file%, %section%, %name%, %default%
 	return value
 }
 
@@ -83,7 +83,7 @@ IniFile_getbool(self, name, default="ERROR") {
 check_active_window() {
 	global
 	last_active_id := active_id
-	WinGet, active_id, Id, A
+	WinGet active_id, Id, A
 	If (active_id != last_active_id)
 	{
 		is_pre_x   := False
@@ -103,7 +103,7 @@ is_target_window_active() {
 	; TscShellContainerClass    = Remote Desktop
 	; cygwin/x                  = Cygwin X
 	local win_class, target_active := True
-	WinGetClass, win_class, A
+	WinGetClass win_class, A
 	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
 	{
 		target_active := False
@@ -116,11 +116,11 @@ is_target_window_active() {
 }
 
 is_cmd_prompt_active() {
-	IfWinActive,ahk_class ConsoleWindowClass
+	IfWinActive ahk_class ConsoleWindowClass
 	{
-		IfWinActive,ahk_exe cmd.exe
+		IfWinActive ahk_exe cmd.exe
 			Return True
-		IfWinActive,ahk_exe powershell.exe
+		IfWinActive ahk_exe powershell.exe
 			Return True
 	}
 	Return False
@@ -134,7 +134,7 @@ update_icon() {
 		icon := ICON_DISABLE
 	Else
 		icon := ICON_NORMAL
-	Menu, Tray, icon, %icon%,, 1
+	Menu Tray, icon, %icon%,, 1
 }
 
 clear_pre_x() {
@@ -158,8 +158,8 @@ toggle_pre_spc() {
 }
 
 confirm_exit() {
-	MsgBox, 0x60124,, Exit Emacs.ahk ?
-	IfMsgBox, Yes
+	MsgBox 0x60124,, Exit Emacs.ahk ?
+	IfMsgBox Yes
 		ExitApp
 }
 
@@ -167,30 +167,30 @@ show_suspend_popup() {
 	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
 	global suspend_popup_trans
 	suspend_popup_trans := 500
-	Gui, 1:Destroy
+	Gui 1:Destroy
 	if (A_IsSuspended) {
-		Gui, 1:Color, 222222
-		Gui, 1:Font, Caaaaaa S50 Strike
+		Gui 1:Color, 222222
+		Gui 1:Font, Caaaaaa S50 Strike
 	} else {
-		Gui, 1:Color, 222288
-		Gui, 1:Font, Cffffff S50
+		Gui 1:Color, 222288
+		Gui 1:Font, Cffffff S50
 	}
-	Gui, 1:Margin, 20, 20
-	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
-	WinSet, TransParent, 250
-	Gui, 1:Add, Text, Center, Emacs
-	Gui, 1:Show, NA Center AutoSize
-	SetTimer, SuspendPopupFadeOut, 20
+	Gui 1:Margin, 20, 20
+	Gui 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
+	WinSet TransParent, 250
+	Gui 1:Add, Text, Center, Emacs
+	Gui 1:Show, NA Center AutoSize
+	SetTimer SuspendPopupFadeOut, 20
 	Return
 
 SuspendPopupFadeOut:
 	suspend_popup_trans := suspend_popup_trans - 40
 	if (suspend_popup_trans <= 0) {
-		SetTimer, SuspendPopupFadeOut, Off
-		Gui, 1:Destroy
+		SetTimer SuspendPopupFadeOut, Off
+		Gui 1:Destroy
 	} else if (suspend_popup_trans < 250) {
-		Gui, 1:+LastFound
-		WinSet, TransParent, %suspend_popup_trans%
+		Gui 1:+LastFound
+		WinSet TransParent, %suspend_popup_trans%
 	}
 	Return
 }
@@ -265,10 +265,10 @@ find_file() {
 	Send ^o
 }
 save_buffer() {
-	Send, ^s
+	Send ^s
 }
 write_file() {
-	Send, !fa
+	Send !fa
 }
 kill_emacs() {
 	Send !{F4}
@@ -369,7 +369,7 @@ initialize() {
 	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
 
 	update_icon()
-	SetTimer, CheckActiveWindow, 500
+	SetTimer CheckActiveWindow, 500
 }
 
 ; }
@@ -388,7 +388,7 @@ CheckActiveWindow:
 
 ; Exit {
 #^k::
-	Suspend,Permit
+	Suspend Permit
 	confirm_exit()
 	Return
 ;}
@@ -428,7 +428,7 @@ CheckActiveWindow:
 
 ; Ctrl-x combination commands {
 ^x::
-	Suspend,On
+	Suspend On
 	toggle_pre_x()
 	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
 	Input key, B I M L1 T3, %endkeys%
@@ -468,7 +468,7 @@ CheckActiveWindow:
 		}
 	}
 	key :=
-	Suspend,Off
+	Suspend Off
 	toggle_pre_x()
 	Return
 ;}
