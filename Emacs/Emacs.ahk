@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 20 Mar 2018
+;   Last Changed: 11 Apr 2018
 ;=====================================================================
 
 #NoEnv
@@ -135,13 +135,14 @@ is_target_window_active() {
 	; VNCMDI_Window             = VNC
 	; TscShellContainerClass    = Remote Desktop
 	; cygwin/x                  = Cygwin X
+	; vcxsrv/x                  = VcXsrv X
 	local win_class, target_active := True
 	WinGetClass win_class, A
 	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
 	{
 		target_active := False
 	}
-	else if win_class contains cygwin/x
+	else if win_class contains cygwin/x,vcxsrv/x
 	{
 		target_active := False
 	}
