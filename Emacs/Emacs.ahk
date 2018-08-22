@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 11 Apr 2018
+;   Last Changed: 22 Aug 2018
 ;=====================================================================
 
 #NoEnv
@@ -18,6 +18,8 @@ INI_DEFAULT_SECTION := "Emacs"
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
 KILL_RING_MAX := 30
+DISABLE_WINDOW_CLASSES := DEFAULT_DISABLE_WINDOW_CLASSES := "ConsoleWindowClass"
+DISABLE_WINDOW_MATCHES := ""
 
 ; Icons
 ICON_NORMAL  := A_ScriptDir . "\Emacs-n.ico"
@@ -48,6 +50,7 @@ IniFile := Object("_file", ""
 	, "_section", ""
 	, "__Get", "IniFile__Get"
 	, "get", "IniFile_get"
+	, "getlist", "IniFile_getlist"
 	, "getbool", "IniFile_getbool")
 
 IniFileOpen(file, section) {
@@ -72,6 +75,27 @@ IniFile_get(self, name, default="ERROR") {
 	return value
 }
 
+IniFile_getlist(self, name, sep=".") {
+	file := self._file
+	section := self._section
+	IniRead values, %file%, %section%
+	name .= sep
+	keylen := StrLen(name)
+	out := Object()
+	Loop, Parse, values, `n, `r
+	{
+		StringSplit, line, A_LoopField, =
+		key := line1
+		value := line2
+		if (name == SubStr(key, 1, keylen))
+		{
+			key := SubStr(key, keylen + 1)
+			out[key] := value
+		}
+	}
+	return out
+}
+
 IniFile_getbool(self, name, default="ERROR") {
 	value := self.get(name, default)
 	if (value == default)
@@ -81,6 +105,20 @@ IniFile_getbool(self, name, default="ERROR") {
 	if (value = "false" || value = "no" || value = 0)
 		return False
 	return default
+}
+
+; }
+
+; String object {
+
+String_Join(sep, obj) {
+	static _join := "".base.join := Func("String_Join")
+	out := ""
+	for _, value in obj
+	{
+		out .= value sep
+	}
+	 return SubStr(out, 1, -1)
 }
 
 ; }
@@ -126,27 +164,20 @@ pop_kill_ring() {
 }
 
 is_target_window_active() {
-	; ConsoleWindowClass        = Command Prompt, Cygwin
-	; TMobaXtermForm            = MobaXTerm
-	; Vim                       = GVim
-	; PuTTY                     = Putty
-	; mintty                    = mintty
-	; VirtualConsoleClass       = ConEmu
-	; VNCMDI_Window             = VNC
-	; TscShellContainerClass    = Remote Desktop
-	; cygwin/x                  = Cygwin X
-	; vcxsrv/x                  = VcXsrv X
-	local win_class, target_active := True
+	local win_class
 	WinGetClass win_class, A
-	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
+	if win_class in %DISABLE_WINDOW_CLASSES%
 	{
-		target_active := False
+		Return False
 	}
-	else if win_class contains cygwin/x,vcxsrv/x
+	if (StrLen(DISABLE_WINDOW_MATCHES) > 0)
 	{
-		target_active := False
+		if win_class contains %DISABLE_WINDOW_MATCHES%
+		{
+			Return False
+		}
 	}
-	Return target_active
+	Return True
 }
 
 is_cmd_prompt_active() {
@@ -403,11 +434,18 @@ initialize()
 Return
 
 initialize() {
-	local ini
+	local ini, disable_wins
 	ini := IniFileOpen(INI_FILE, INI_DEFAULT_SECTION)
 	ENABLE_CMD_PROMPT := ini.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
 	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
 	KILL_RING_MAX := ini.get("KillRingMax", KILL_RING_MAX)
+
+	disable_wins := ",".join(ini.getlist("DisableWindowClass"))
+	if (StrLen(disable_wins) > 0)
+	{
+		DISABLE_WINDOW_CLASSES := DEFAULT_DISABLE_WINDOW_CLASSES "," disable_wins
+	}
+	DISABLE_WINDOW_MATCHES := ",".join(ini.getlist("DisableWindowClassMatch"))
 
 	update_icon()
 	SetTimer CheckActiveWindow, 500
