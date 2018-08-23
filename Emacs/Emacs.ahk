@@ -279,12 +279,16 @@ is_cmd_prompt_active() {
 
 update_icon() {
 	local icon
-	If is_pre_x
+	if (is_pre_x)
 		icon := ICON_PRE_X
-	Else If A_IsSuspended
+	else if (A_IsSuspended)
 		icon := ICON_DISABLE
-	Else
+	else if (is_target_window_active())
 		icon := ICON_NORMAL
+	else if (ENABLE_CMD_PROMPT && is_cmd_prompt_active())
+		icon := ICON_NORMAL
+	else
+		icon := ICON_DISABLE
 	Menu Tray, icon, %icon%,, 1
 }
 
