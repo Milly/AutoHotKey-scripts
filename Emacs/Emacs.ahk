@@ -512,6 +512,56 @@ cmd_search_backward() {
 	clear_pre_spc()
 }
 
+pre_x() {
+	static CANCEL_KEYS := String_Join(""
+		, ["{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}"
+		, "{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}"
+		, "{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}"])
+
+	toggle_pre_x()
+	try {
+		Input key, B I M L1 T3, %CANCEL_KEYS%
+		if (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
+			key := Chr(Asc(key) + 0x60)
+		else if (SubStr(ErrorLevel, 1, 7) = "EndKey:")
+			key := "{" . SubStr(ErrorLevel, 8) . "}"
+		if (GetKeyState("Ctrl", "P"))
+			key := "^" . key
+		if (GetKeyState("Shift", "P"))
+			key := "+" . key
+		if (GetKeyState("Alt", "P"))
+			key := "!" . key
+	} finally {
+		clear_pre_x()
+	}
+
+	if (key != "")
+	{
+		if (key = "^c")
+			kill_emacs()
+		else if (key = "^f")
+			find_file()
+		else if (key = "k")
+			kill_buffer()
+		else if (key = "^p")
+			select_all()
+		else if (key = "^s")
+			save_buffer()
+		else if (key = "u")
+			undo()
+		else if (key = "w")
+			change_window_size()
+		else if (key = "^w")
+			write_file()
+		else if (THROW_INPUT_WITH_X)
+		{
+			if ("a" <= key && key <= "z")
+				key := "^" . key
+			Send %key%
+		}
+	}
+}
+
 ; }
 
 ; Initialize {
@@ -604,47 +654,8 @@ OnClipboardChange:
 ; Ctrl-x combination commands {
 ^x::
 	Suspend On
-	toggle_pre_x()
-	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
-	Input key, B I M L1 T3, %endkeys%
-	If (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
-		key := Chr(Asc(key) + 0x60)
-	Else If (SubStr(ErrorLevel, 1, 7) = "EndKey:")
-		key := "{" . SubStr(ErrorLevel, 8) . "}"
-	If (GetKeyState("Ctrl", "P"))
-		key := "^" . key
-	If (GetKeyState("Shift", "P"))
-		key := "+" . key
-	If (GetKeyState("Alt", "P"))
-		key := "!" . key
-	If (key <> "")
-	{
-		If (key = "^c")
-			kill_emacs()
-		Else If (key = "^f")
-			find_file()
-		Else If (key = "k")
-			kill_buffer()
-		Else If (key = "^p")
-			select_all()
-		Else If (key = "^s")
-			save_buffer()
-		Else If (key = "u")
-			undo()
-		Else If (key = "w")
-			change_window_size()
-		Else If (key = "^w")
-			write_file()
-		Else If (THROW_INPUT_WITH_X)
-		{
-			If ("a" <= key && key <= "z")
-				key := "^" . key
-			Send %key%
-		}
-	}
-	key :=
+	pre_x()
 	Suspend Off
-	toggle_pre_x()
 	Return
 ;}
 
