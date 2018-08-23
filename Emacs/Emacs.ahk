@@ -526,14 +526,15 @@ cmd_search_backward() {
 	clear_pre_spc()
 }
 
-pre_x() {
+pre_x() { ; Ctrl-x combination commands
 	static CANCEL_KEYS := String_Join(""
 		, ["{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}"
 		, "{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}"
 		, "{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}"])
 
-	toggle_pre_x()
 	try {
+		toggle_pre_x()
+		Suspend On
 		Input key, B I M L1 T3, %CANCEL_KEYS%
 		if (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
 			key := Chr(Asc(key) + 0x60)
@@ -546,6 +547,7 @@ pre_x() {
 		if (GetKeyState("Alt", "P"))
 			key := "!" . key
 	} finally {
+		Suspend Off
 		clear_pre_x()
 	}
 
@@ -658,6 +660,7 @@ OnClipboardChange:
 !v::	scroll_up()
 ^w::	kill_region()
 !w::	kill_ring_save()
+^x::	pre_x()
 ^y::	yank()
 !y::	yank_pop()
 ^/::	undo()
@@ -665,14 +668,6 @@ OnClipboardChange:
 ^@::	toggle_pre_spc()
 ^_::	undo()
 ^Space::	toggle_pre_spc()
-;}
-
-; Ctrl-x combination commands {
-^x::
-	Suspend On
-	pre_x()
-	Suspend Off
-	Return
 ;}
 
 ; toggle suspend {
