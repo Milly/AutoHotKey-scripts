@@ -691,6 +691,7 @@ OnClipboardChange:
 ; toggle suspend {
 ^q::
 	Suspend
+	show_suspend_popup()
 	update_icon()
 	Return
 ;}
