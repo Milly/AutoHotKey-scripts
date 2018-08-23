@@ -202,10 +202,11 @@ String_Join(sep, obj) {
 	static _join := "".base.join := Func("String_Join")
 	out := ""
 	for _, value in obj
-	{
 		out .= value sep
-	}
-	 return SubStr(out, 1, -1)
+	seplen := StrLen(sep)
+	if (seplen > 0)
+		out := SubStr(out, 1, -seplen)
+	return out
 }
 
 ; }
