@@ -41,8 +41,7 @@ is_pre_spc := False
 ; kill ring
 kill_ring_last := 0
 kill_ring_pos := 0
-kill_ring_pop := False
-kill_ring := Object()
+kill_ring_updating := False
 
 ; }
 
@@ -227,17 +226,18 @@ check_active_window() {
 
 on_clipboard_change() {
 	global
-	if (kill_ring_pop)
+	if (kill_ring_updating)
 		Return
 	if (A_EventInfo == 0)
 		Return
 	if (++kill_ring_last > KILL_RING_MAX)
 		kill_ring_last := 1
+	; Array can not be used
 	kill_ring_%kill_ring_last% := ClipboardAll
 	kill_ring_pos := kill_ring_last
 }
 
-pop_kill_ring() {
+kill_ring_pop() {
 	global
 	if (kill_ring_pos == 0)
 		Return
@@ -245,10 +245,10 @@ pop_kill_ring() {
 		kill_ring_pos := KILL_RING_MAX
 	if (StrLen(kill_ring_%kill_ring_pos%) == 0)
 		kill_ring_pos := kill_ring_last
-	kill_ring_pop := True
+	kill_ring_updating := True
 	Clipboard := kill_ring_%kill_ring_pos%
 	Sleep 10 ;[ms]
-	kill_ring_pop := False
+	kill_ring_updating := False
 }
 
 is_target_window_active() {
@@ -412,7 +412,7 @@ yank() {
 }
 yank_pop() {
 	Send ^z
-	pop_kill_ring()
+	kill_ring_pop()
 	Send ^v
 	clear_pre_spc()
 }
