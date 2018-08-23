@@ -251,6 +251,13 @@ kill_ring_pop() {
 	kill_ring_updating := False
 }
 
+kill_ring_clear() {
+	global
+	kill_ring_pos := kill_ring_last = 0
+	Loop, %KILL_RING_MAX%
+		kill_ring_%A_Index% := ""
+}
+
 is_target_window_active() {
 	local win_class
 	WinGetClass win_class, A
@@ -559,6 +566,8 @@ pre_x() {
 			change_window_size()
 		else if (key = "^w")
 			write_file()
+		else if (key = ":")
+			kill_ring_clear()
 		else if (THROW_INPUT_WITH_X)
 		{
 			if ("a" <= key && key <= "z")
