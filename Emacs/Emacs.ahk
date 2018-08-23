@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 22 Aug 2018
+;   Last Changed: 23 Aug 2018
 ;=====================================================================
 
 #NoEnv
@@ -12,7 +12,7 @@ StringCaseSense On
 
 ; Ini file
 INI_FILE := A_ScriptDir . "\Emacs.ini"
-INI_DEFAULT_SECTION := "Emacs"
+INI_MAIN_SECTION := "Emacs"
 
 ; Options
 ENABLE_CMD_PROMPT := True
@@ -46,65 +46,151 @@ kill_ring := Object()
 
 ; IniFile object {
 
-IniFile := Object("_file", ""
-	, "_section", ""
-	, "__Get", "IniFile__Get"
-	, "get", "IniFile_get"
-	, "getlist", "IniFile_getlist"
-	, "getbool", "IniFile_getbool")
+class IniFile {
+	_file := ""
 
-IniFileOpen(file, section) {
-	global IniFile
-	self := Object("_file", file
-		, "_section", section
-		, "base", IniFile)
-	return self
-}
+	__New(file) {
+		this._file := file
+	}
 
-IniFile__Get(self, name) {
-	value := self.get(name)
-	if (value == "ERROR")
-		throw "KeyError"
-	return value
-}
+	__Get(section) {
+		return this._getsection(section, False, -2)
+	}
 
-IniFile_get(self, name, default="ERROR") {
-	file := self._file
-	section := self._section
-	IniRead value, %file%, %section%, %name%, %default%
-	return value
-}
+	_NewEnum() {
+		return this.sections()._NewEnum()
+	}
 
-IniFile_getlist(self, name, sep=".") {
-	file := self._file
-	section := self._section
-	IniRead values, %file%, %section%
-	name .= sep
-	keylen := StrLen(name)
-	out := Object()
-	Loop, Parse, values, `n, `r
-	{
-		StringSplit, line, A_LoopField, =
-		key := line1
-		value := line2
-		if (name == SubStr(key, 1, keylen))
+	HasKey(name) {
+		return this.has_section(name)
+	}
+
+	sections() {
+		file := this._file
+		IniRead values, %file%
+		res := Array()
+		Loop, Parse, values, `n, `r
+			res.Push(A_LoopField)
+		return res
+	}
+
+	options(section) {
+		res := []
+		for option, _ in this._option_items(section)
+			res.Push(option)
+		return res
+	}
+
+	_section_items() {
+		res := Object()
+		for _, section in this.sections()
+			res[section] = this._getsection(section, False, -1)
+		return res
+	}
+
+	_option_items(section) {
+		if (!this.has_section(section))
+			throw Exception("NoSection: " section, -2)
+		file := this._file
+		IniRead values, %file%, %section%
+		res := Object()
+		Loop, Parse, values, `n, `r
 		{
-			key := SubStr(key, keylen + 1)
-			out[key] := value
+			StringSplit, line, A_LoopField, =
+			res[line1] := line2
+		}
+		return res
+	}
+
+	has_section(section) {
+		sections := ",".join(this.sections())
+		if section in %sections%
+			return True
+		return False
+	}
+
+	has_option(section, option) {
+		default := "==NOT_A_VALUE_EXIST"
+		value := this._getoption(section, option, default, -1)
+		return (value != default)
+	}
+
+	items(section="") {
+		if (section == "") {
+			return this._section_items()
+		}
+		return this._option_items(section)
+	}
+
+	getsection(section, create=False) {
+		return this._getsection(section, create, -2)
+	}
+
+	_getsection(section, create, what) {
+		if (this.has_section(section) || create)
+			return new IniProxy(this, section)
+		throw Exception("NoSection: " section, what)
+	}
+
+	get(section, name, default="==NOT_A_VALUE") {
+		return this._getoption(section, name, default, -2)
+	}
+
+	_getoption(section, name, default, what) {
+		file := this._file
+		IniRead value, %file%, %section%, %name%, %default%
+		if (value == "==NOT_A_VALUE")
+			throw Exception("NoOption in [" section "]: " name, what)
+		return value
+	}
+
+	getbool(section, name, default:="==NOT_A_VALUE") {
+		value := this._getoption(section, name, default, -2)
+		if (value == default)
+			return default
+		if (value = "true" || value = "yes" || value = 1)
+			return True
+		if (value = "false" || value = "no" || value = 0)
+			return False
+		return default
+	}
+}
+
+class IniProxy {
+	_inifile := ""
+	_section := ""
+
+	__New(inifile, section) {
+		this._inifile := inifile
+		this._section := section
+	}
+
+	__Get(name) {
+		return this._inifile._getoption(this._section, name, "==NOT_A_VALUE", -2)
+	}
+
+	__Call(name, args*) {
+		inifile := this._inifile
+		if (!IsFunc(ObjGetBase(this)[name]) && IsFunc(ObjGetBase(inifile)[name])) {
+			try {
+				return inifile[name](this._section, args*)
+			} catch e {
+				throw Exception(e.Message, -1, e.Extra)
+			}
 		}
 	}
-	return out
-}
 
-IniFile_getbool(self, name, default="ERROR") {
-	value := self.get(name, default)
-	if (value == default)
-		return default
-	if (value = "true" || value = "yes" || value = 1)
-		return True
-	if (value = "false" || value = "no" || value = 0)
-		return False
-	return default
+	_NewEnum() {
+		return this.options()._NewEnum()
+	}
+
+	HasKey(name) {
+		return this.has_option(name)
+	}
+
+	sections() {
+		throw Exception("NotImplement: IniProxy.sections()", -1)
+	}
 }
 
 ; }
@@ -434,18 +520,23 @@ initialize()
 Return
 
 initialize() {
-	local ini, disable_wins
-	ini := IniFileOpen(INI_FILE, INI_DEFAULT_SECTION)
-	ENABLE_CMD_PROMPT := ini.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
-	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
-	KILL_RING_MAX := ini.get("KillRingMax", KILL_RING_MAX)
+	local ini, main, sect, disable_wins
+	ini := new IniFile(INI_FILE)
 
-	disable_wins := ",".join(ini.getlist("DisableWindowClass"))
+	main := ini[INI_MAIN_SECTION]
+	ENABLE_CMD_PROMPT := main.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
+	THROW_INPUT_WITH_X := main.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
+	KILL_RING_MAX := main.get("KillRingMax", KILL_RING_MAX)
+
+	sect := INI_MAIN_SECTION ":DisableWindowClasses"
+	disable_wins := ",".join(ini.getsection(sect, True).items())
 	if (StrLen(disable_wins) > 0)
 	{
 		DISABLE_WINDOW_CLASSES := DEFAULT_DISABLE_WINDOW_CLASSES "," disable_wins
 	}
-	DISABLE_WINDOW_MATCHES := ",".join(ini.getlist("DisableWindowClassMatch"))
+
+	sect := INI_MAIN_SECTION ":DisableWindowClassMatches"
+	DISABLE_WINDOW_MATCHES := ",".join(ini.getsection(sect, False).items())
 
 	update_icon()
 	SetTimer CheckActiveWindow, 500
