@@ -20,7 +20,7 @@ INI_MAIN_SECTION := "Emacs"
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
 KILL_RING_MAX := 30
-KILL_RING_STR_LEN := 20000
+KILL_RING_DATA_SIZE := 20000
 DISABLE_WINDOW_CLASSES
 	:= DEFAULT_DISABLE_WINDOW_CLASSES
 	:= "
@@ -238,13 +238,14 @@ on_clipboard_change() {
 		Return
 	if (A_EventInfo == 0)  ; clipboard cleared
 		Return
-	if (StrLen(Clipboard) > KILL_RING_STR_LEN)
+	local data := ClipboardAll
+	if (StrLen(data) > KILL_RING_DATA_SIZE)
 		Return
 	if (++kill_ring_last > KILL_RING_MAX)
 		kill_ring_last := 1
 	kill_ring_types[kill_ring_last] := A_EventInfo
 	; Array can not be used
-	kill_ring_%kill_ring_last% := ClipboardAll
+	kill_ring_%kill_ring_last% := data
 	kill_ring_pos := kill_ring_last
 }
 
@@ -693,6 +694,7 @@ initialize() {
 	ENABLE_CMD_PROMPT := main.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
 	THROW_INPUT_WITH_X := main.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
 	KILL_RING_MAX := main.get("KillRingMax", KILL_RING_MAX)
+	KILL_RING_DATA_SIZE := main.get("KillRingDataSize", KILL_RING_DATA_SIZE)
 
 	sect := INI_MAIN_SECTION ":DisableWindowClasses"
 	disable_wins := ",".join(ini.getsection(sect, True).items())
