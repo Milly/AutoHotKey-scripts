@@ -1,23 +1,32 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 01 Feb 2018
+;   Last Changed: 23 Aug 2018
 ;=====================================================================
 
 #NoEnv
 #InstallKeybdHook
 #UseHook
-StringCaseSense, On
-SetBatchLines, -1
+StringCaseSense On
+SetBatchLines -1
 
 ; Vars {
 
 ; Ini file
 INI_FILE := A_ScriptDir . "\Emacs.ini"
-INI_DEFAULT_SECTION := "Emacs"
+INI_MAIN_SECTION := "Emacs"
 
 ; Options
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
+KILL_RING_MAX := 30
+DISABLE_WINDOW_CLASSES
+	:= DEFAULT_DISABLE_WINDOW_CLASSES
+	:= "
+(C LTrim Join,
+	ConsoleWindowClass        ; Command Prompt, Cygwin
+	ApplicationFrameWindow    ; UWP Application
+)"
+DISABLE_WINDOW_MATCHES := ""
 
 ; Icons
 ICON_NORMAL  := A_ScriptDir . "\Emacs-n.ico"
@@ -34,65 +43,175 @@ is_pre_x   := False
 ; Flag: C-Space
 is_pre_spc := False
 
-; Windows classes to invalidate keybinding
-INVALIDATE_TARGETS := "
-(C LTrim Join,
-	ConsoleWindowClass        ; Command Prompt, Cygwin
-	TMobaXtermForm            ; MobaXTerm
-	Vim                       ; GVim
-	PuTTY                     ; Putty
-	mintty                    ; mintty
-	VirtualConsoleClass       ; ConEmu
-	VNCMDI_Window             ; VNC
-	TscShellContainerClass    ; Remote Desktop
-)"
-
-INVALIDATE_CONTAINS := "
-(C LTrim Join,
-	cygwin/x                  ; Cygwin X
-)"
+; kill ring
+kill_ring_last := 0
+kill_ring_pos := 0
+kill_ring_updating := False
 
 ; }
 
 ; IniFile object {
 
-IniFile := Object("_file", ""
-	, "_section", ""
-	, "__Get", "IniFile__Get"
-	, "get", "IniFile_get"
-	, "getbool", "IniFile_getbool")
+class IniFile {
+	_file := ""
 
-IniFileOpen(file, section) {
-	global IniFile
-	self := Object("_file", file
-		, "_section", section
-		, "base", IniFile)
-	return self
-}
+	__New(file) {
+		this._file := file
+	}
 
-IniFile__Get(self, name) {
-	value := self.get(name)
-	if (value == "ERROR")
-		throw "KeyError"
-	return value
-}
+	__Get(section) {
+		return this._getsection(section, False, -2)
+	}
 
-IniFile_get(self, name, default="ERROR") {
-	file := self._file
-	section := self._section
-	IniRead, value, %file%, %section%, %name%, %default%
-	return value
-}
+	_NewEnum() {
+		return this.sections()._NewEnum()
+	}
 
-IniFile_getbool(self, name, default="ERROR") {
-	value := self.get(name, default)
-	if (value == default)
-		return default
-	if (value = "true" || value = "yes" || value = 1)
-		return True
-	if (value = "false" || value = "no" || value = 0)
+	HasKey(name) {
+		return this.has_section(name)
+	}
+
+	sections() {
+		file := this._file
+		IniRead values, %file%
+		res := Array()
+		Loop Parse, values, `n, `r
+			res.Push(A_LoopField)
+		return res
+	}
+
+	options(section) {
+		res := []
+		for option, _ in this._option_items(section)
+			res.Push(option)
+		return res
+	}
+
+	_section_items() {
+		res := Object()
+		for _, section in this.sections()
+			res[section] = this._getsection(section, False, -1)
+		return res
+	}
+
+	_option_items(section) {
+		if (!this.has_section(section))
+			throw Exception("NoSection: " section, -2)
+		file := this._file
+		IniRead values, %file%, %section%
+		res := Object()
+		Loop Parse, values, `n, `r
+		{
+			StringSplit line, A_LoopField, =
+			res[line1] := line2
+		}
+		return res
+	}
+
+	has_section(section) {
+		sections := ",".join(this.sections())
+		if section in %sections%
+			return True
 		return False
-	return default
+	}
+
+	has_option(section, option) {
+		default := "==NOT_A_VALUE_EXIST"
+		value := this._getoption(section, option, default, -1)
+		return (value != default)
+	}
+
+	items(section="") {
+		if (section == "") {
+			return this._section_items()
+		}
+		return this._option_items(section)
+	}
+
+	getsection(section, create=False) {
+		return this._getsection(section, create, -2)
+	}
+
+	_getsection(section, create, what) {
+		if (this.has_section(section) || create)
+			return new IniProxy(this, section)
+		throw Exception("NoSection: " section, what)
+	}
+
+	get(section, name, default="==NOT_A_VALUE") {
+		return this._getoption(section, name, default, -2)
+	}
+
+	_getoption(section, name, default, what) {
+		file := this._file
+		IniRead value, %file%, %section%, %name%, %default%
+		if (value == "==NOT_A_VALUE")
+			throw Exception("NoOption in [" section "]: " name, what)
+		return value
+	}
+
+	getbool(section, name, default:="==NOT_A_VALUE") {
+		value := this._getoption(section, name, default, -2)
+		if (value == default)
+			return default
+		if (value = "true" || value = "yes" || value = 1)
+			return True
+		if (value = "false" || value = "no" || value = 0)
+			return False
+		return default
+	}
+}
+
+class IniProxy {
+	_inifile := ""
+	_section := ""
+
+	__New(inifile, section) {
+		this._inifile := inifile
+		this._section := section
+	}
+
+	__Get(name) {
+		return this._inifile._getoption(this._section, name, "==NOT_A_VALUE", -2)
+	}
+
+	__Call(name, args*) {
+		inifile := this._inifile
+		if (!IsFunc(ObjGetBase(this)[name]) && IsFunc(ObjGetBase(inifile)[name])) {
+			try {
+				return inifile[name](this._section, args*)
+			} catch e {
+				throw Exception(e.Message, -1, e.Extra)
+			}
+		}
+	}
+
+	_NewEnum() {
+		return this.options()._NewEnum()
+	}
+
+	HasKey(name) {
+		return this.has_option(name)
+	}
+
+	sections() {
+		throw Exception("NotImplement: IniProxy.sections()", -1)
+	}
+}
+
+; }
+
+; String object {
+
+String_Join(sep, obj) {
+	static _join := "".base.join := Func("String_Join")
+	out := ""
+	for _, value in obj
+		out .= value sep
+	seplen := StrLen(sep)
+	if (seplen > 0)
+		out := SubStr(out, 1, -seplen)
+	return out
 }
 
 ; }
@@ -102,29 +221,71 @@ IniFile_getbool(self, name, default="ERROR") {
 check_active_window() {
 	global
 	last_active_id := active_id
-	WinGet, active_id, Id, A
-	if (active_id != last_active_id) {
+	WinGet active_id, Id, A
+	If (active_id != last_active_id)
+	{
 		clear_pre_x()
 		clear_pre_spc()
 	}
 }
 
+on_clipboard_change() {
+	global
+	if (kill_ring_updating)
+		Return
+	if (A_EventInfo == 0)
+		Return
+	if (++kill_ring_last > KILL_RING_MAX)
+		kill_ring_last := 1
+	; Array can not be used
+	kill_ring_%kill_ring_last% := ClipboardAll
+	kill_ring_pos := kill_ring_last
+}
+
+kill_ring_pop() {
+	global
+	if (kill_ring_pos == 0)
+		Return
+	if (--kill_ring_pos < 1)
+		kill_ring_pos := KILL_RING_MAX
+	if (StrLen(kill_ring_%kill_ring_pos%) == 0)
+		kill_ring_pos := kill_ring_last
+	kill_ring_updating := True
+	Clipboard := kill_ring_%kill_ring_pos%
+	Sleep 10 ;[ms]
+	kill_ring_updating := False
+}
+
+kill_ring_clear() {
+	global
+	kill_ring_pos := kill_ring_last = 0
+	Loop %KILL_RING_MAX%
+		kill_ring_%A_Index% := ""
+}
+
 is_target_window_active() {
 	local win_class
-	WinGetClass, win_class, A
-	if win_class in %INVALIDATE_TARGETS%
+	WinGetClass win_class, A
+	if win_class in %DISABLE_WINDOW_CLASSES%
+	{
 		Return False
-	if win_class contains %INVALIDATE_CONTAINS%
-		Return False
+	}
+	if (StrLen(DISABLE_WINDOW_MATCHES) > 0)
+	{
+		if win_class contains %DISABLE_WINDOW_MATCHES%
+		{
+			Return False
+		}
+	}
 	Return True
 }
 
 is_cmd_prompt_active() {
-	IfWinActive,ahk_class ConsoleWindowClass
+	IfWinActive ahk_class ConsoleWindowClass
 	{
-		IfWinActive,ahk_exe cmd.exe
+		IfWinActive ahk_exe cmd.exe
 			Return True
-		IfWinActive,ahk_exe powershell.exe
+		IfWinActive ahk_exe powershell.exe
 			Return True
 	}
 	Return False
@@ -134,18 +295,22 @@ update_icon() {
 	local icon
 	if (is_pre_x)
 		icon := ICON_PRE_X
-	else if (A_IsSuspended || !is_target_window_active())
+	else if (A_IsSuspended)
 		icon := ICON_DISABLE
-	else
+	else if (is_target_window_active())
 		icon := ICON_NORMAL
-	Menu, Tray, icon, %icon%,, 1
+	else if (ENABLE_CMD_PROMPT && is_cmd_prompt_active())
+		icon := ICON_NORMAL
+	else
+		icon := ICON_DISABLE
+	Menu Tray, icon, %icon%,, 1
 }
 
 clear_pre_x() {
 	global
 	is_pre_x := False
 	update_icon()
-	SetTimer, ShowPreXTimeout, Off
+	SetTimer ShowPreXTimeout, Off
 	hide_popup()
 }
 
@@ -153,7 +318,7 @@ enable_pre_x() {
 	global
 	is_pre_x := True
 	update_icon()
-	SetTimer, ShowPreXTimeout, -1000
+	SetTimer ShowPreXTimeout, -1000
 	Return
 
 ShowPreXTimeout:
@@ -172,8 +337,8 @@ toggle_pre_spc() {
 }
 
 confirm_exit() {
-	MsgBox, 0x60124,, Exit Emacs.ahk ?
-	IfMsgBox, Yes
+	MsgBox 0x60124,, Exit Emacs.ahk ?
+	IfMsgBox Yes
 		ExitApp
 }
 
@@ -192,20 +357,20 @@ show_popup(label, bgcolor = "222222", font = "", timeout = 150, transparent = 25
 	global popup_trans
 	popup_trans := transparent
 	hide_popup()
-	Gui, 1:Color, %bgcolor%
-	Gui, 1:Font, Cffffff S50 %font%
-	Gui, 1:Margin, 20, 20
-	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
-	WinSet, TransParent, %transparent%
-	Gui, 1:Add, Text, Center, %label%
-	Gui, 1:Show, NA Center AutoSize
+	Gui 1:Color, %bgcolor%
+	Gui 1:Font, Cffffff S50 %font%
+	Gui 1:Margin, 20, 20
+	Gui 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
+	WinSet TransParent, %transparent%
+	Gui 1:Add, Text, Center, %label%
+	Gui 1:Show, NA Center AutoSize
 	if (0 < timeout) {
-		SetTimer, PopupTimeout, % -timeout
+		SetTimer PopupTimeout, % -timeout
 	}
 	Return
 
 PopupTimeout:
-	SetTimer, PopupFadeOut, 20
+	SetTimer PopupFadeOut, 20
 	Return
 
 PopupFadeOut:
@@ -213,16 +378,16 @@ PopupFadeOut:
 	if (popup_trans <= 0) {
 		hide_popup()
 	} else {
-		Gui, 1:+LastFound
-		WinSet, TransParent, %popup_trans%
+		Gui 1:+LastFound
+		WinSet TransParent, %popup_trans%
 	}
 	Return
 }
 
 hide_popup() {
-	SetTimer, PopupTimeout, Off
-	SetTimer, PopupFadeOut, Off
-	Gui, 1:Destroy
+	SetTimer PopupTimeout, Off
+	SetTimer PopupFadeOut, Off
+	Gui 1:Destroy
 }
 
 ; }
@@ -295,6 +460,12 @@ yank() {
 	Send ^v
 	clear_pre_spc()
 }
+yank_pop() {
+	Send ^z
+	kill_ring_pop()
+	Send ^v
+	clear_pre_spc()
+}
 undo() {
 	Send ^z
 	clear_pre_spc()
@@ -307,10 +478,10 @@ find_file() {
 	Send ^o
 }
 save_buffer() {
-	Send, ^s
+	Send ^s
 }
 write_file() {
-	Send, !fa
+	Send !fa
 }
 kill_emacs() {
 	Send !{F4}
@@ -425,6 +596,62 @@ cmd_search_backward() {
 	clear_pre_spc()
 }
 
+pre_x() { ; Ctrl-x combination commands
+	static CANCEL_KEYS := String_Join(""
+		, ["{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}"
+		, "{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}"
+		, "{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}"])
+
+	try {
+		enable_pre_x()
+		Suspend On
+		Input key, B I M L1 T3, %CANCEL_KEYS%
+		if (ErrorLevel = "Timeout")
+			key := ""
+		else if (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
+			key := Chr(Asc(key) + 0x60)
+		else if (SubStr(ErrorLevel, 1, 7) = "EndKey:")
+			key := "{" . SubStr(ErrorLevel, 8) . "}"
+		if (GetKeyState("Ctrl", "P"))
+			key := "^" . key
+		if (GetKeyState("Shift", "P"))
+			key := "+" . key
+		if (GetKeyState("Alt", "P"))
+			key := "!" . key
+	} finally {
+		Suspend Off
+		clear_pre_x()
+	}
+
+	if (key != "")
+	{
+		if (key = "^c")
+			kill_emacs()
+		else if (key = "^f")
+			find_file()
+		else if (key = "k")
+			kill_buffer()
+		else if (key = "^p")
+			select_all()
+		else if (key = "^s")
+			save_buffer()
+		else if (key = "u")
+			undo()
+		else if (key = "w")
+			change_window_size()
+		else if (key = "^w")
+			write_file()
+		else if (key = ":")
+			kill_ring_clear()
+		else if (THROW_INPUT_WITH_X)
+		{
+			if ("a" <= key && key <= "z")
+				key := "^" . key
+			Send %key%
+		}
+	}
+}
+
 ; }
 
 ; Initialize {
@@ -433,13 +660,26 @@ initialize()
 Return
 
 initialize() {
-	local ini
-	ini := IniFileOpen(INI_FILE, INI_DEFAULT_SECTION)
-	ENABLE_CMD_PROMPT := ini.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
-	THROW_INPUT_WITH_X := ini.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
+	local ini, main, sect, disable_wins
+	ini := new IniFile(INI_FILE)
+
+	main := ini[INI_MAIN_SECTION]
+	ENABLE_CMD_PROMPT := main.getbool("EnableCmdPrompt", ENABLE_CMD_PROMPT)
+	THROW_INPUT_WITH_X := main.getbool("ThrowInputWithX", THROW_INPUT_WITH_X)
+	KILL_RING_MAX := main.get("KillRingMax", KILL_RING_MAX)
+
+	sect := INI_MAIN_SECTION ":DisableWindowClasses"
+	disable_wins := ",".join(ini.getsection(sect, True).items())
+	if (StrLen(disable_wins) > 0)
+	{
+		DISABLE_WINDOW_CLASSES := DEFAULT_DISABLE_WINDOW_CLASSES "," disable_wins
+	}
+
+	sect := INI_MAIN_SECTION ":DisableWindowClassMatches"
+	DISABLE_WINDOW_MATCHES := ",".join(ini.getsection(sect, False).items())
 
 	update_icon()
-	SetTimer, CheckActiveWindow, 500
+	SetTimer CheckActiveWindow, 500
 }
 
 ; }
@@ -450,6 +690,10 @@ CheckActiveWindow:
 	check_active_window()
 	Return
 
+OnClipboardChange:
+	on_clipboard_change()
+	Return
+
 ; }
 
 ; Hook keys {
@@ -458,7 +702,7 @@ CheckActiveWindow:
 
 ; Exit {
 #^k::
-	Suspend,Permit
+	Suspend Permit
 	confirm_exit()
 	Return
 ;}
@@ -492,7 +736,9 @@ CheckActiveWindow:
 !v::	scroll_up()
 ^w::	kill_region()
 !w::	kill_ring_save()
+^x::	pre_x()
 ^y::	yank()
+!y::	yank_pop()
 ^/::	undo()
 ^?::	redo()
 ^@::	toggle_pre_spc()
@@ -500,55 +746,6 @@ CheckActiveWindow:
 !<::	beginning_of_buffer()
 !>::	end_of_buffer()
 ^Space::	toggle_pre_spc()
-;}
-
-; Ctrl-x combination commands {
-^x::
-	Suspend,On
-	enable_pre_x()
-	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
-	Input key, B I M L1 T3, %endkeys%
-	If (ErrorLevel = "Timeout")
-		key := ""
-	Else If (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
-		key := Chr(Asc(key) + 0x60)
-	Else If (SubStr(ErrorLevel, 1, 7) = "EndKey:")
-		key := "{" . SubStr(ErrorLevel, 8) . "}"
-	If (GetKeyState("Ctrl", "P"))
-		key := "^" . key
-	If (GetKeyState("Shift", "P"))
-		key := "+" . key
-	If (GetKeyState("Alt", "P"))
-		key := "!" . key
-	If (key <> "")
-	{
-		If (key = "^c")
-			kill_emacs()
-		Else If (key = "^f")
-			find_file()
-		Else If (key = "k")
-			kill_buffer()
-		Else If (key = "^p")
-			select_all()
-		Else If (key = "^s")
-			save_buffer()
-		Else If (key = "u")
-			undo()
-		Else If (key = "w")
-			change_window_size()
-		Else If (key = "^w")
-			write_file()
-		Else If (THROW_INPUT_WITH_X)
-		{
-			If ("a" <= key && key <= "z")
-				key := "^" . key
-			Send %key%
-		}
-	}
-	key :=
-	Suspend,Off
-	clear_pre_x()
-	Return
 ;}
 
 ; toggle suspend {
@@ -583,6 +780,7 @@ CheckActiveWindow:
 ; toggle suspend {
 ^q::
 	Suspend
+	show_suspend_popup()
 	update_icon()
 	Return
 ;}
