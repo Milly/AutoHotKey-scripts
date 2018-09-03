@@ -9,6 +9,7 @@
 StringCaseSense On
 SetBatchLines -1
 
+
 ; Vars {
 
 ; Ini file
@@ -19,6 +20,7 @@ INI_MAIN_SECTION := "Emacs"
 ENABLE_CMD_PROMPT := True
 THROW_INPUT_WITH_X := True
 KILL_RING_MAX := 30
+KILL_RING_STR_LEN := 20000
 DISABLE_WINDOW_CLASSES
 	:= DEFAULT_DISABLE_WINDOW_CLASSES
 	:= "
@@ -47,6 +49,7 @@ is_pre_spc := False
 kill_ring_last := 0
 kill_ring_pos := 0
 kill_ring_updating := False
+kill_ring_types := []
 
 ; }
 
@@ -233,10 +236,13 @@ on_clipboard_change() {
 	global
 	if (kill_ring_updating)
 		Return
-	if (A_EventInfo == 0)
+	if (A_EventInfo == 0)  ; clipboard cleared
+		Return
+	if (StrLen(Clipboard) > KILL_RING_STR_LEN)
 		Return
 	if (++kill_ring_last > KILL_RING_MAX)
 		kill_ring_last := 1
+	kill_ring_types[kill_ring_last] := A_EventInfo
 	; Array can not be used
 	kill_ring_%kill_ring_last% := ClipboardAll
 	kill_ring_pos := kill_ring_last
@@ -251,6 +257,7 @@ kill_ring_pop() {
 	if (StrLen(kill_ring_%kill_ring_pos%) == 0)
 		kill_ring_pos := kill_ring_last
 	kill_ring_updating := True
+	Sleep 10 ;[ms]
 	Clipboard := kill_ring_%kill_ring_pos%
 	Sleep 10 ;[ms]
 	kill_ring_updating := False
@@ -258,7 +265,8 @@ kill_ring_pop() {
 
 kill_ring_clear() {
 	global
-	kill_ring_pos := kill_ring_last = 0
+	kill_ring_pos := kill_ring_last := 0
+	kill_ring_types := []
 	Loop %KILL_RING_MAX%
 		kill_ring_%A_Index% := ""
 }
@@ -464,6 +472,21 @@ yank_pop() {
 	Send ^z
 	kill_ring_pop()
 	Send ^v
+	clear_pre_spc()
+}
+yank_pop_dialog() {
+	global kill_ring_last, kill_ring_pos, kill_ring_types
+	if (kill_ring_pos == 0)
+		Return
+	kill_ring_pop()
+	no := kill_ring_last - kill_ring_pos
+	msg := "Kill-ring (" no "):"
+	if (kill_ring_types[kill_ring_pos] == 1) {  ; text
+		msg .= "`n" Clipboard
+	} else {  ; non text
+		msg .= " (non text)"
+	}
+	show_popup(msg, {bgcolor:"228822", font:"S16", timeout:1000, transparent:200}*)
 	clear_pre_spc()
 }
 undo() {
@@ -741,7 +764,7 @@ OnClipboardChange:
 !w::	kill_ring_save()
 ^x::	pre_x()
 ^y::	yank()
-!y::	yank_pop()
+!y::	yank_pop_dialog()
 ^/::	undo()
 ^?::	redo()
 ^@::	toggle_pre_spc()
