@@ -603,6 +603,7 @@ pre_x() { ; Ctrl-x combination commands
 		{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}
 		{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
 	)"
+	global THROW_INPUT_WITH_X
 
 	try {
 		enable_pre_x()
