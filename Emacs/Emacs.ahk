@@ -1,6 +1,6 @@
 ;=====================================================================
 ; Emacs keybinding
-;   Last Changed: 23 Aug 2018
+;   Last Changed: 03 Sep 2018
 ;=====================================================================
 
 #NoEnv
@@ -597,10 +597,12 @@ cmd_search_backward() {
 }
 
 pre_x() { ; Ctrl-x combination commands
-	static CANCEL_KEYS := String_Join(""
-		, ["{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}"
-		, "{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}"
-		, "{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}"])
+	static CANCEL_KEYS := "
+	(C LTrim Join
+		{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}
+		{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}
+		{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
+	)"
 
 	try {
 		enable_pre_x()
