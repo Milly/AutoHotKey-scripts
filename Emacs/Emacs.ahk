@@ -7,6 +7,7 @@
 #InstallKeybdHook
 #UseHook
 StringCaseSense, On
+SetBatchLines, -1
 
 ; Vars {
 
@@ -32,6 +33,24 @@ is_pre_x   := False
 
 ; Flag: C-Space
 is_pre_spc := False
+
+; Windows classes to invalidate keybinding
+INVALIDATE_TARGETS := "
+(C LTrim Join,
+	ConsoleWindowClass        ; Command Prompt, Cygwin
+	TMobaXtermForm            ; MobaXTerm
+	Vim                       ; GVim
+	PuTTY                     ; Putty
+	mintty                    ; mintty
+	VirtualConsoleClass       ; ConEmu
+	VNCMDI_Window             ; VNC
+	TscShellContainerClass    ; Remote Desktop
+)"
+
+INVALIDATE_CONTAINS := "
+(C LTrim Join,
+	cygwin/x                  ; Cygwin X
+)"
 
 ; }
 
@@ -84,35 +103,20 @@ check_active_window() {
 	global
 	last_active_id := active_id
 	WinGet, active_id, Id, A
-	If (active_id != last_active_id)
-	{
-		is_pre_x   := False
-		is_pre_spc := False
-		update_icon()
+	if (active_id != last_active_id) {
+		clear_pre_x()
+		clear_pre_spc()
 	}
 }
 
 is_target_window_active() {
-	; ConsoleWindowClass        = Command Prompt, Cygwin
-	; TMobaXtermForm            = MobaXTerm
-	; Vim                       = GVim
-	; PuTTY                     = Putty
-	; mintty                    = mintty
-	; VirtualConsoleClass       = ConEmu
-	; VNCMDI_Window             = VNC
-	; TscShellContainerClass    = Remote Desktop
-	; cygwin/x                  = Cygwin X
-	local win_class, target_active := True
+	local win_class
 	WinGetClass, win_class, A
-	if win_class in ConsoleWindowClass,TMobaXtermForm,PuTTY,mintty,VirtualConsoleClass,Vim,VNCMDI_Window,TscShellContainerClass
-	{
-		target_active := False
-	}
-	else if win_class contains cygwin/x
-	{
-		target_active := False
-	}
-	Return target_active
+	if win_class in %INVALIDATE_TARGETS%
+		Return False
+	if win_class contains %INVALIDATE_CONTAINS%
+		Return False
+	Return True
 }
 
 is_cmd_prompt_active() {
@@ -128,11 +132,11 @@ is_cmd_prompt_active() {
 
 update_icon() {
 	local icon
-	If is_pre_x
+	if (is_pre_x)
 		icon := ICON_PRE_X
-	Else If A_IsSuspended
+	else if (A_IsSuspended || !is_target_window_active())
 		icon := ICON_DISABLE
-	Else
+	else
 		icon := ICON_NORMAL
 	Menu, Tray, icon, %icon%,, 1
 }
@@ -141,17 +145,27 @@ clear_pre_x() {
 	global
 	is_pre_x := False
 	update_icon()
+	SetTimer, ShowPreXTimeout, Off
+	hide_popup()
 }
-toggle_pre_x() {
+
+enable_pre_x() {
 	global
-	is_pre_x := ! is_pre_x
+	is_pre_x := True
 	update_icon()
+	SetTimer, ShowPreXTimeout, -1000
+	Return
+
+ShowPreXTimeout:
+	show_popup("C-x", {bgcolor:"228822", timeout:0, transparent:200}*)
+	Return
 }
 
 clear_pre_spc() {
 	global
 	is_pre_spc := False
 }
+
 toggle_pre_spc() {
 	global
 	is_pre_spc := ! is_pre_spc
@@ -164,35 +178,51 @@ confirm_exit() {
 }
 
 show_suspend_popup() {
-	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
-	global suspend_popup_trans
-	suspend_popup_trans := 500
-	Gui, 1:Destroy
+	param := Object()
 	if (A_IsSuspended) {
-		Gui, 1:Color, 222222
-		Gui, 1:Font, Caaaaaa S50 Strike
+		param.font := "Caaaaaa Strike"
 	} else {
-		Gui, 1:Color, 222288
-		Gui, 1:Font, Cffffff S50
+		param.bgcolor := "222288"
 	}
+	show_popup("Emacs", param*)
+}
+
+show_popup(label, bgcolor = "222222", font = "", timeout = 150, transparent = 250) {
+	static WS_EX_TRANSPARENT = 0x20, WS_EX_NOACTIVATE = 0x8000000
+	global popup_trans
+	popup_trans := transparent
+	hide_popup()
+	Gui, 1:Color, %bgcolor%
+	Gui, 1:Font, Cffffff S50 %font%
 	Gui, 1:Margin, 20, 20
 	Gui, 1:+LastFound +AlwaysOnTop +ToolWindow +Disabled -Border -Caption +E%WS_EX_TRANSPARENT% +E%WS_EX_NOACTIVATE%
-	WinSet, TransParent, 250
-	Gui, 1:Add, Text, Center, Emacs
+	WinSet, TransParent, %transparent%
+	Gui, 1:Add, Text, Center, %label%
 	Gui, 1:Show, NA Center AutoSize
-	SetTimer, SuspendPopupFadeOut, 20
-	Return
-
-SuspendPopupFadeOut:
-	suspend_popup_trans := suspend_popup_trans - 40
-	if (suspend_popup_trans <= 0) {
-		SetTimer, SuspendPopupFadeOut, Off
-		Gui, 1:Destroy
-	} else if (suspend_popup_trans < 250) {
-		Gui, 1:+LastFound
-		WinSet, TransParent, %suspend_popup_trans%
+	if (0 < timeout) {
+		SetTimer, PopupTimeout, % -timeout
 	}
 	Return
+
+PopupTimeout:
+	SetTimer, PopupFadeOut, 20
+	Return
+
+PopupFadeOut:
+	popup_trans -= 40
+	if (popup_trans <= 0) {
+		hide_popup()
+	} else {
+		Gui, 1:+LastFound
+		WinSet, TransParent, %popup_trans%
+	}
+	Return
+}
+
+hide_popup() {
+	SetTimer, PopupTimeout, Off
+	SetTimer, PopupFadeOut, Off
+	Gui, 1:Destroy
 }
 
 ; }
@@ -207,8 +237,20 @@ delete_backward_char() {
 	Send {BS}
 	clear_pre_spc()
 }
+kill_word() {
+	Send {ShiftDown}^{RIGHT}{ShiftUp}
+	Sleep 10 ;[ms]
+	Send ^x
+	clear_pre_spc()
+}
+backward_kill_word() {
+	Send {ShiftDown}^{LEFT}{ShiftUp}
+	Sleep 10 ;[ms]
+	Send ^x
+	clear_pre_spc()
+}
 kill_line() {
-	Send {ShiftDown}{END}{SHIFTUP}
+	Send {ShiftDown}{END}{ShiftUp}
 	Sleep 10 ;[ms]
 	Send ^x
 	clear_pre_spc()
@@ -290,6 +332,20 @@ move_end_of_line() {
 	Else
 		Send {END}
 }
+beginning_of_buffer() {
+	global
+	If is_pre_spc
+		Send +^{HOME}
+	Else
+		Send ^{HOME}
+}
+end_of_buffer() {
+	global
+	If is_pre_spc
+		Send +^{END}
+	Else
+		Send ^{END}
+}
 previous_line() {
 	global
 	If is_pre_spc
@@ -317,6 +373,20 @@ backward_char() {
 		Send +{Left}
 	Else
 		Send {Left}
+}
+forward_word() {
+	global
+	If is_pre_spc
+		Send +^{Right}
+	Else
+		Send ^{Right}
+}
+backward_word() {
+	global
+	If is_pre_spc
+		Send +^{Left}
+	Else
+		Send ^{Left}
 }
 scroll_up() {
 	global
@@ -400,9 +470,13 @@ CheckActiveWindow:
 ; single commands {
 ^a::	move_beginning_of_line()
 ^b::	backward_char()
+!b::	backward_word()
 ^d::	delete_char()
+!d::	kill_word()
+!BS::	backward_kill_word()
 ^e::	move_end_of_line()
 ^f::	forward_char()
+!f::	forward_word()
 ^g::	quit()
 ^h::	delete_backward_char()
 ^i::	indent_for_tab_command()
@@ -423,16 +497,20 @@ CheckActiveWindow:
 ^?::	redo()
 ^@::	toggle_pre_spc()
 ^_::	undo()
+!<::	beginning_of_buffer()
+!>::	end_of_buffer()
 ^Space::	toggle_pre_spc()
 ;}
 
 ; Ctrl-x combination commands {
 ^x::
 	Suspend,On
-	toggle_pre_x()
+	enable_pre_x()
 	endkeys = {F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Esc}
 	Input key, B I M L1 T3, %endkeys%
-	If (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
+	If (ErrorLevel = "Timeout")
+		key := ""
+	Else If (ErrorLevel = "Max" && Asc(key) <= 26) ; Ctrl+[a-z]
 		key := Chr(Asc(key) + 0x60)
 	Else If (SubStr(ErrorLevel, 1, 7) = "EndKey:")
 		key := "{" . SubStr(ErrorLevel, 8) . "}"
@@ -469,7 +547,7 @@ CheckActiveWindow:
 	}
 	key :=
 	Suspend,Off
-	toggle_pre_x()
+	clear_pre_x()
 	Return
 ;}
 
